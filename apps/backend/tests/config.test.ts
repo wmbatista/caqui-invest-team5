@@ -12,6 +12,12 @@ describe('configuration', () => {
       effort: 'low',
       llmEnabled: true,
       clockDefault: '2026-11-18T10:00:00-03:00',
+      chatLimitePorMinuto: 30,
+      estadoMaxConversas: 2000,
     });
+  });
+
+  it('reads the abuse limits from the environment', () => {
+    expect(loadConfig({ CHAT_LIMITE_POR_MINUTO: '5', ESTADO_MAX_CONVERSAS: '10' })).toMatchObject({ chatLimitePorMinuto: 5, estadoMaxConversas: 10 });
   });
 });

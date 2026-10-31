@@ -1,4 +1,8 @@
-import type { ChatMessage } from '../domain/chat.js';
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 import type { Config } from '../config.js';
 
 export interface LlmProvider {

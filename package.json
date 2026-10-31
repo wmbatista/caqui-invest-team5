@@ -2,18 +2,23 @@
   "name": "caqui-invest-team5",
   "version": "0.1.0",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": ["apps/*", "packages/*"],
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "dev": "npm run dev --workspace=@caqui/backend",
-    "build": "npm run build --workspace=@caqui/backend",
+    "contracts:build": "npm run build --workspace=@caqui/contracts",
+    "dev": "npm run contracts:build && concurrently -n api,web \"npm run dev --workspace=@caqui/backend\" \"npm run dev --workspace=@caqui/web\"",
+    "build": "npm run contracts:build && npm run build --workspace=@caqui/backend && npm run build --workspace=@caqui/web",
     "start": "npm run start --workspace=@caqui/backend",
     "llm:ping": "npm run llm:ping --workspace=@caqui/backend",
-    "typecheck": "npm run typecheck --workspace=@caqui/backend",
-    "test": "npm run test --workspace=@caqui/backend",
-    "check": "npm run check --workspace=@caqui/backend"
+    "typecheck": "npm run contracts:build && npm run typecheck --workspace=@caqui/backend && npm run typecheck --workspace=@caqui/web",
+    "test": "npm run contracts:build && npm run test --workspace=@caqui/backend && npm run test --workspace=@caqui/web",
+    "avaliar": "npm run contracts:build && npm run avaliar --workspace=@caqui/backend",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
   },
   "overrides": {
     "toad-cache": "3.3.0"

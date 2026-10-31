@@ -1,3 +1,4 @@
+# SUBSTITUÍDO por specs/001-onde-esta-meu-dinheiro/contracts/openapi.yaml
 openapi: 3.0.3
 info:
   title: Caqui Chat API

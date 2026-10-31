@@ -1,5 +1,7 @@
 # Feature Specification: API de chat com IA
 
+> **Substituída** por [specs/001-onde-esta-meu-dinheiro](../001-onde-esta-meu-dinheiro/spec.md): `POST /perguntar` foi removido, e `POST /api/v1/chat` agora exige sessão e não recebe histórico.
+
 **Feature Branch**: `main`
 **Created**: 2026-10-31
 **Status**: Ready

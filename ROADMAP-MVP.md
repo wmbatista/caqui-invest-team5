@@ -1,5 +1,7 @@
 # ROADMAP MVP: agente "Onde está meu dinheiro?"
 
+> **Substituído em parte** por [specs/001-onde-esta-meu-dinheiro](specs/001-onde-esta-meu-dinheiro/tasks.md): o `POST /perguntar` foi removido, porque recebia o cliente no corpo. Vale o chat com sessão.
+
 O menor agente que responde bem uma única pergunta: **onde está o dinheiro do cliente**, seja o
 status e o prazo de uma aplicação, resgate ou transferência, seja onde o saldo está hoje.
 

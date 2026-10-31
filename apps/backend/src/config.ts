@@ -12,6 +12,8 @@ const envSchema = z.object({
   LLM_ENABLED: z.enum(['true', 'false']).default('true').transform((value) => value === 'true'),
   LLM_TIMEOUT_MS: z.coerce.number().int().min(100).max(120000).default(20000),
   CLOCK_DEFAULT: z.string().datetime({ offset: true }).default('2026-11-18T10:00:00-03:00'),
+  CHAT_LIMITE_POR_MINUTO: z.coerce.number().int().min(1).default(30),
+  ESTADO_MAX_CONVERSAS: z.coerce.number().int().min(1).default(2000),
 });
 
 export type Config = ReturnType<typeof loadConfig>;
@@ -31,5 +33,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env) {
     llmEnabled: env.LLM_ENABLED,
     timeoutMs: env.LLM_TIMEOUT_MS,
     clockDefault: env.CLOCK_DEFAULT,
+    chatLimitePorMinuto: env.CHAT_LIMITE_POR_MINUTO,
+    estadoMaxConversas: env.ESTADO_MAX_CONVERSAS,
   };
 }

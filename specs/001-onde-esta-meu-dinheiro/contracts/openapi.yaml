@@ -1,0 +1,381 @@
+openapi: 3.0.3
+info:
+  title: Caqui Invest - Onde está meu dinheiro
+  version: 1.0.0
+  description: >
+    API do assistente. Substitui o contrato de specs/001-chat-api-backend. O cliente vem sempre da
+    sessão, nunca do corpo ou do texto. Todos os dados são sintéticos.
+servers:
+  - url: http://localhost:3000
+security:
+  - bearer: []
+paths:
+  /health:
+    get:
+      summary: Saúde do serviço
+      security: []
+      responses:
+        '200':
+          description: Serviço no ar
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [ok] }
+  /api/v1/personas:
+    get:
+      summary: Personas do login simulado
+      security: []
+      responses:
+        '200':
+          description: Lista fixa, sem saldo
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Persona' }
+  /api/v1/sessoes:
+    post:
+      summary: Entra como uma persona (login simulado, sem senha)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [personaId]
+              properties:
+                personaId: { type: string }
+      responses:
+        '201':
+          description: Sessão criada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, nome, papel]
+                properties:
+                  token: { type: string }
+                  nome: { type: string }
+                  papel: { $ref: '#/components/schemas/Papel' }
+        '400': { $ref: '#/components/responses/Invalida' }
+  /api/v1/sessoes/atual:
+    delete:
+      summary: Encerra a sessão atual
+      responses:
+        '204': { description: Encerrada }
+        '401': { $ref: '#/components/responses/SemSessao' }
+  /api/v1/eu:
+    get:
+      summary: Quem está na sessão, o relógio e a saída para humano
+      responses:
+        '200':
+          description: Dados da sessão
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [nome, papel, agora]
+                properties:
+                  nome: { type: string }
+                  papel: { $ref: '#/components/schemas/Papel' }
+                  agora: { type: string, format: date-time }
+                  cliente:
+                    type: object
+                    nullable: true
+                    required: [id, nome, idade, cpfMascarado]
+                    properties:
+                      id: { type: string }
+                      nome: { type: string }
+                      idade: { type: integer }
+                      cpfMascarado: { type: string }
+                  humano:
+                    allOf: [{ $ref: '#/components/schemas/SaidaHumano' }]
+                    nullable: true
+        '401': { $ref: '#/components/responses/SemSessao' }
+  /api/v1/relogio:
+    put:
+      summary: Ajusta o relógio de demonstração desta sessão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [momento]
+              properties:
+                momento: { type: string, format: date-time, example: '2026-11-18T23:00:00-03:00' }
+      responses:
+        '200':
+          description: Relógio ajustado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [agora]
+                properties:
+                  agora: { type: string, format: date-time }
+        '400': { $ref: '#/components/responses/Invalida' }
+        '401': { $ref: '#/components/responses/SemSessao' }
+  /api/v1/meu-dinheiro:
+    get:
+      summary: Posições e movimentos do cliente da sessão
+      responses:
+        '200':
+          description: Posição atual; valores brutos, antes do imposto
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeuDinheiro' }
+        '401': { $ref: '#/components/responses/SemSessao' }
+        '403': { $ref: '#/components/responses/PapelNegado' }
+  /api/v1/conversas:
+    post:
+      summary: Abre uma conversa e gera o protocolo
+      responses:
+        '201':
+          description: Conversa criada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, protocolo]
+                properties:
+                  id: { type: string, format: uuid }
+                  protocolo: { type: string, example: CQ-20261118-0001 }
+        '401': { $ref: '#/components/responses/SemSessao' }
+        '403': { $ref: '#/components/responses/PapelNegado' }
+  /api/v1/chat:
+    post:
+      summary: Envia uma mensagem; a triagem roda antes de qualquer resposta
+      description: >
+        Falha do provedor de LLM não gera erro: a resposta sai do template. O botão "Falar com uma
+        pessoa" usa este mesmo endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [conversaId, mensagem]
+              properties:
+                conversaId: { type: string, format: uuid }
+                mensagem: { type: string, minLength: 1, maxLength: 2000 }
+      responses:
+        '200':
+          description: Resposta do assistente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RespostaChat' }
+        '400': { $ref: '#/components/responses/Invalida' }
+        '401': { $ref: '#/components/responses/SemSessao' }
+        '403': { $ref: '#/components/responses/PapelNegado' }
+        '404':
+          description: Conversa não existe ou é de outro cliente, sem distinção
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+        '429':
+          description: Limite de envio atingido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Erro' }
+  /api/v1/regras:
+    get:
+      summary: Regras vigentes em português, para os chips da tela
+      responses:
+        '200':
+          description: Regras por hierarquia
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [code, titulo, camada, texto]
+                  properties:
+                    code: { type: string, example: CQ-05 }
+                    titulo: { type: string }
+                    camada: { type: string, enum: [CONSTITUICAO, LEI, DECRETO] }
+                    texto: { type: string }
+        '401': { $ref: '#/components/responses/SemSessao' }
+  /api/v1/atendente/fila:
+    get:
+      summary: Fila com protocolo, resumo e histórico (só atendente)
+      responses:
+        '200':
+          description: Segurança primeiro, depois prioridade, depois mais recente; até 50 casos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Caso' }
+        '401': { $ref: '#/components/responses/SemSessao' }
+        '403': { $ref: '#/components/responses/PapelNegado' }
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+  responses:
+    Invalida:
+      description: Requisição inválida (código INVALID_REQUEST)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    SemSessao:
+      description: Sem sessão, expirada ou bloqueada (código SESSAO_INVALIDA)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+    PapelNegado:
+      description: Papel sem acesso (código PAPEL_NEGADO)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Erro' }
+  schemas:
+    Papel:
+      type: string
+      enum: [cliente, atendente]
+    Acao:
+      type: string
+      description: Mesmos valores de acao_esperada em dados/perguntas_teste.jsonl
+      enum: [responder, encaminhar_humano, encaminhar_especialista, seguranca_imediata, protocolo, recusar]
+    Destino:
+      type: string
+      enum: [humano, seguranca, especialista, retorno, reclamacao]
+    Persona:
+      type: object
+      required: [id, papel, nome, descricao]
+      properties:
+        id: { type: string, example: C-0001 }
+        papel: { $ref: '#/components/schemas/Papel' }
+        nome: { type: string }
+        descricao: { type: string }
+    Fonte:
+      type: object
+      required: [tipo, id]
+      properties:
+        tipo: { type: string, enum: [kb, conta] }
+        id: { type: string, description: 'KB-006, OP-10005, P-0001. KB-007 nunca aparece.' }
+        titulo: { type: string }
+    SaidaHumano:
+      type: object
+      required: [disponivel, prioridade]
+      properties:
+        disponivel: { type: boolean }
+        prioridade: { type: boolean }
+        espera: { type: string, nullable: true, description: 'Estimativa simulada, só das 8h às 20h' }
+        retorno: { type: string, nullable: true, example: a partir das 8h }
+    OpcaoOperacao:
+      type: object
+      required: [id, descricao]
+      properties:
+        id: { type: string, example: OP-10007 }
+        descricao: { type: string }
+    RespostaChat:
+      type: object
+      required: [conversaId, protocolo, resposta, acao, fontes, regras, humano, sessaoBloqueada, passo, geradoPor]
+      properties:
+        conversaId: { type: string, format: uuid }
+        protocolo: { type: string, example: CQ-20261118-0001 }
+        resposta: { type: string, description: Texto com CPF sempre mascarado }
+        acao: { $ref: '#/components/schemas/Acao' }
+        fontes:
+          type: array
+          items: { $ref: '#/components/schemas/Fonte' }
+        regras:
+          type: array
+          items: { type: string, example: CQ-01 }
+        humano: { $ref: '#/components/schemas/SaidaHumano' }
+        sessaoBloqueada:
+          type: boolean
+          description: Verdadeiro em golpe. A sessão já foi encerrada; o front mostra a tela de bloqueio.
+        opcoes:
+          type: array
+          description: Presente quando há mais de uma operação candidata
+          items: { $ref: '#/components/schemas/OpcaoOperacao' }
+        passo: { type: integer, minimum: 1 }
+        geradoPor: { type: string, enum: [template, llm] }
+    PosicaoItem:
+      type: object
+      required: [id, produto, valorAplicado, saldoBruto, dataAplicacao, liquidez, texto]
+      properties:
+        id: { type: string, example: P-0001 }
+        produto: { type: string }
+        valorAplicado: { type: string, example: 'R$ 40.000,00' }
+        saldoBruto: { type: string, example: 'R$ 40.791,24' }
+        dataAplicacao: { type: string, example: 16/09/2026 }
+        vencimento: { type: string, nullable: true }
+        liquidez: { type: string }
+        oscila: { type: boolean, description: Ações e multimercado; sem projeção de rendimento }
+        texto: { type: string }
+    Movimento:
+      type: object
+      required: [id, tipo, produto, valor, pedidoEm, status, emAndamento]
+      properties:
+        id: { type: string, example: OP-10005 }
+        tipo: { type: string, enum: [aplicacao, resgate, transferencia_saida_pix, transferencia_entrada] }
+        produto: { type: string, description: 'Nome do produto, ou Pix' }
+        valor: { type: string }
+        pedidoEm: { type: string, example: 17/11/2026 às 19h40 }
+        status: { type: string, enum: [pendente, em_processamento, liquidada, recusada] }
+        caiEm: { type: string, nullable: true, example: 18/11/2026 }
+        dataCalculada: { type: boolean, description: 'Verdadeiro quando a data veio do motor, não do arquivo' }
+        atrasada: { type: boolean }
+        emAndamento: { type: boolean }
+        observacao: { type: string, nullable: true }
+    MeuDinheiro:
+      type: object
+      required: [hoje, saldoEmConta, total, avisoBruto, posicoes, movimentos]
+      properties:
+        hoje: { type: string, example: 18/11/2026 }
+        saldoEmConta: { type: string, example: 'R$ 1.250,00' }
+        total: { type: string }
+        avisoBruto: { type: string }
+        posicoes:
+          type: array
+          items: { $ref: '#/components/schemas/PosicaoItem' }
+        movimentos:
+          type: array
+          items: { $ref: '#/components/schemas/Movimento' }
+    MensagemHistorico:
+      type: object
+      required: [autor, texto, regras]
+      properties:
+        autor: { type: string, enum: [cliente, caqui] }
+        texto: { type: string, description: CPF já mascarado }
+        acao: { $ref: '#/components/schemas/Acao' }
+        regras:
+          type: array
+          items: { type: string }
+    Caso:
+      type: object
+      required: [id, protocolo, destino, prioridade, motivo, resumo, status, momento, nome, idade, historico]
+      properties:
+        id: { type: string }
+        protocolo: { type: string }
+        destino: { $ref: '#/components/schemas/Destino' }
+        prioridade: { type: boolean }
+        motivo: { type: string }
+        resumo: { type: string }
+        status: { type: string, enum: [aberto] }
+        momento: { type: string, example: 18/11 23:10 }
+        nome: { type: string }
+        idade: { type: integer }
+        historico:
+          type: array
+          items: { $ref: '#/components/schemas/MensagemHistorico' }
+    Erro:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [INVALID_REQUEST, SESSAO_INVALIDA, PAPEL_NEGADO, CONVERSA_NAO_ENCONTRADA, LIMITE_EXCEDIDO]
+        message: { type: string }

@@ -1,9 +1,12 @@
-# Caqui Invest: atendimento que escala com confiança
+# Caqui Invest: onde está meu dinheiro
 
-## MVP do grupo: Caqui Chat API
+**URL pública:** ainda não publicada. **Spec:** [SPEC.md](SPEC.md). **Avaliação:** [docs/avaliacao.md](docs/avaliacao.md).
 
-O repositório agora inclui um backend Node.js/TypeScript para o frontend enviar mensagens a uma
-LLM via OpenRouter usando sua API OpenAI-compatible.
+Assistente para quem pergunta "meu dinheiro está lá?": mostra onde está o saldo e quando cada operação cai, com a conta e a fonte à mostra. Golpe, pressão de terceiro e confusão vão para uma pessoa, que já recebe protocolo e histórico. Portado do projeto Caqui Confere para TypeScript, sem banco de dados.
+
+## Rodar
+
+Só precisa de Node 22. Sem banco e sem chave de LLM.
 
 ```bash
 cp .env.example .env
@@ -11,15 +14,62 @@ npm install
 npm run dev
 ```
 
-O endpoint do MVP0 é `POST /perguntar`; veja a [especificação](specs/001-chat-api-backend/spec.md),
-o [OpenAPI](specs/001-chat-api-backend/contracts/openapi.yaml) e o [quickstart](specs/001-chat-api-backend/quickstart.md).
-Este MVP não persiste conversas: o frontend reenvia o histórico em cada chamada.
+Front em http://localhost:5173 e API em http://localhost:3000. O login é simulado: escolha uma persona.
 
 ```bash
-curl -X POST http://localhost:3000/perguntar \
-  -H 'content-type: application/json' \
-  -d '{"id_cliente":"C-0001","pergunta":"Quanto eu tenho aplicado?"}'
+npm run check                 # tipos, testes e build
+npm run avaliar               # gera respostas.jsonl
+python ferramentas/checar_respostas.py respostas.jsonl --regras 1,4,5,6,7,8,9,10,11,12
+git config core.hooksPath ferramentas/hooks   # trava de commit: CPF completo e chave
 ```
+
+## Como funciona
+
+```
+mensagem ──► triagem (golpe · recomendação · injeção · vulnerável) ──► caminho decidido por código
+                                  │
+                                  ├─ status e prazo ──► motor de prazos sobre o calendário
+                                  ├─ posição ─────────► dados da conta
+                                  └─ fora do escopo ──► diz que não trata e oferece uma pessoa
+```
+
+- **`apps/backend`:** Fastify. Lê `dados/` na subida; sessões, conversas e fila ficam em memória e somem ao reiniciar.
+- **`apps/web`:** React com Vite. Telas do cliente e do atendente.
+- **`packages/contracts`:** schemas Zod da API, compartilhados. Referência: [OpenAPI](specs/001-onde-esta-meu-dinheiro/contracts/openapi.yaml).
+- **LLM (opcional):** só reescreve um texto já correto de status ou posição. Se inventar um fato, falhar ou não houver chave, vale o template.
+
+Limite da demo: com o login simulado, qualquer visitante da URL pública pode entrar como atendente e ler o que outros digitaram. O CPF é mascarado, o resto do texto não.
+
+## Como usamos IA
+
+### Ferramentas
+
+Claude Code (Claude Opus 5.5) com spec-kit em todas as etapas deste porte: leitura do projeto de origem, plano, tarefas, código, testes e conferência no navegador. No produto, OpenRouter é opcional, só para redigir.
+
+### Harness
+
+- A [constituição](.specify/memory/constitution.md) e a [spec](specs/001-onde-esta-meu-dinheiro/spec.md), lidas pelo agente a cada etapa.
+- Checks que o agente roda até passar: `npm run check`, `npm run avaliar` e o checador do case.
+- [Trava de commit](ferramentas/hooks/pre-commit) contra CPF completo e chave.
+
+### Verificado na mão
+
+Conferido por scripts do agente; a leitura por uma pessoa do grupo ainda está pendente ([docs/avaliacao.md](docs/avaliacao.md)):
+
+- Regra de liquidação contra todas as datas de `operacoes.csv`, e números do case recalculados a partir dos dados.
+- Roteiro do quickstart em Chrome real e inspeção do log do servidor.
+- As 31 respostas lidas contra a `resposta_esperada`.
+
+### Onde a IA errou
+
+1. **Testes verdes, proteção furada.** O `/perguntar` tinha testes passando e não chamava a triagem: "quanto tenho? o gerente pediu o código" devolvia o saldo. Só apareceu rodando as perguntas do case e testes adversariais. Mudou: `conversas.csv` virou teste de regressão.
+2. **Portar sem medir.** As travas do caqui acertavam 10 de 10 nas perguntas de golpe e recomendação, mas chamavam de golpe "recebi uma mensagem que meu pix caiu". Com o bloqueio automático, isso derrubaria a sessão de um cliente legítimo. Mudou: golpe passou a exigir um pedido, com casos negativos nos testes.
+3. **Texto que passa nas pistas.** "Seu dinheiro continua aplicado" passava no checador e era impreciso para quem tem resgate em andamento. Só apareceu lendo as respostas.
+4. **Conta herdada.** O SPEC do projeto de origem somava de 24 a 35 atendentes, mas a faixa baixa usava o ganho dos casos entregues calculado para o outro cenário. O certo é de 27 a 35.
+
+---
+
+## Sobre o case
 
 Case aberto do **Hands On com IA: da concepção à produção**, 31/10/2026.
 

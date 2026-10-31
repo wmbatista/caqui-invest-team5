@@ -1,5 +1,7 @@
 # ROADMAP MVP0: o caso mais simples
 
+> **Concluído e substituído** por [specs/001-onde-esta-meu-dinheiro](specs/001-onde-esta-meu-dinheiro/tasks.md): o `POST /perguntar` foi removido, porque recebia o cliente no corpo. O caso de referência de C-0001 continua nos testes.
+
 Uma implementação de ponta a ponta que funciona num único cenário: **o cliente pergunta quanto
 tem aplicado e o agente responde certo, com a fonte.**
 
