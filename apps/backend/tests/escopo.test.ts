@@ -43,4 +43,23 @@ describe('assuntos fora do escopo', () => {
     expect(conversa.naoEntendidas).toBe(0);
     expect(complete).not.toHaveBeenCalled();
   });
+
+  it.each([
+    'Quanto eu ganhei com meus investimentos?',
+    'Qual o retorno do meu dinheiro?',
+    'Quanto meu saldo valorizou esse ano?',
+    'Quanto tenho de lucro?',
+    'Qual o lucro dos meus investimentos?',
+  ])('treats return questions as out of scope even with position words: %s', async (mensagem) => {
+    const { provider, complete } = provedorProibido();
+    const { ultima } = await conversar('C-0001', [mensagem], undefined, provider);
+    expect(ultima.resposta).toContain('não trato');
+    expect(ultima.fontes).toEqual([]);
+    expect(complete).not.toHaveBeenCalled();
+  });
+
+  it('still answers the deadline of a protocol, which also says "retorno"', async () => {
+    const { ultima } = await conversar('C-0001', ['Qual o prazo de retorno do meu protocolo?']);
+    expect(ultima.resposta).not.toContain('não trato');
+  });
 });

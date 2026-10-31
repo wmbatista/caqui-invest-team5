@@ -1,8 +1,12 @@
 import { naoOferecido } from '../triagem/guarda.js';
 import { fonteKb, type Fluxo } from './tipos.js';
 
-/** IR, poupança, rentabilidade e conceitos ficam fora desta spec: a resposta diz isso em vez de improvisar (princípio I). */
-const FORA_DO_ESCOPO = /aliquota|imposto|\bir\b|poupanca|\brend(?:eu|e|er|imento|imentos)\b|rentabilidade|\bo que e\b|\bo que significa\b|garantia|\bfgc\b|diferenca entre|diferenca de|como funciona/;
+/**
+ * IR, poupança, rentabilidade e conceitos ficam fora desta spec: a resposta diz isso em vez de improvisar (princípio I).
+ * Ganho, lucro, retorno e valorização vêm junto com palavras de posição ("meus investimentos", "saldo"), por isso
+ * precisam estar aqui, antes do fluxo de posição. "Retorno" só conta ligado a dinheiro: "prazo de retorno" é do protocolo.
+ */
+const FORA_DO_ESCOPO = /\bretorno (?:d[oa]s? )?(?:(?:meu|minha|meus|minhas) )?(?:dinheiro|investiment|aplicac|cdb|lc[ia]|fundo|tesouro|acoes|carteira)|\bganh(?:ei|ou|amos|o|os)\b|\blucr|valoriz|aliquota|imposto|\bir\b|poupanca|\brend(?:eu|e|er|imento|imentos)\b|rentabilidade|\bo que e\b|\bo que significa\b|garantia|\bfgc\b|diferenca entre|diferenca de|como funciona/;
 
 export const produtoNaoOferecido: Fluxo = (ctx) => {
   if (ctx.sinais.has('nao_entendeu')) return null;
