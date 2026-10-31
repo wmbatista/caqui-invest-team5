@@ -1,9 +1,9 @@
 import { meuDinheiroSchema } from '@caqui/contracts';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { calcularMeuDinheiro } from '../src/atendimento/posicao.js';
 import { loadConfig } from '../src/config.js';
-import { NullProvider } from '../src/providers/openrouter.js';
+import { NullProvider, type CompletionInput, type LlmProvider } from '../src/providers/openrouter.js';
 import { AGORA_PADRAO, conversar, montar } from './apoio.js';
 
 const ids = (resposta: { fontes: { id: string }[] }) => resposta.fontes.map(({ id }) => id);
@@ -96,6 +96,51 @@ describe('pergunta "onde está meu dinheiro?"', () => {
     const { ultima } = await conversar(dono, ['Onde está meu dinheiro?']);
     expect(ultima.resposta).toContain('pode oscilar');
     expect(ids(ultima)).toContain('KB-016');
+  });
+});
+
+/** A primeira chamada ao LLM classifica a intenção; a seguinte (se houver) redige a resposta. */
+function provedorRoteirizado(...respostas: Array<string | null>) {
+  const complete = vi.fn(async (_entrada: CompletionInput): Promise<string | null> => null);
+  for (const resposta of respostas) complete.mockResolvedValueOnce(resposta);
+  const provider: LlmProvider = { name: 'roteirizado', model: 'roteirizado', complete };
+  return { provider, complete };
+}
+
+describe('position questions the patterns miss', () => {
+  it('answers with the client position when the LLM classifies the question as posicao', async () => {
+    const { provider } = provedorRoteirizado('posicao', null);
+    const { ultima } = await conversar('C-0001', ['Qual meu patrimônio?'], AGORA_PADRAO, provider);
+    expect(ultima.resposta).toContain('Seu dinheiro está na Caqui');
+    expect(ids(ultima)).toEqual(expect.arrayContaining(['C-0001', 'P-0001', 'P-0002', 'KB-009']));
+  });
+
+  it('keeps the "não entendi" answer when the LLM says the question is out of scope', async () => {
+    const { provider } = provedorRoteirizado('fora_escopo');
+    const { ultima } = await conversar('C-0001', ['Qual meu patrimônio?'], AGORA_PADRAO, provider);
+    expect(ultima.resposta).toContain('Não entendi');
+    expect(ids(ultima)).not.toContain('P-0001');
+  });
+
+  it('keeps the "não entendi" answer without an LLM', async () => {
+    const { ultima } = await conversar('C-0001', ['Qual meu patrimônio?']);
+    expect(ultima.resposta).toContain('Não entendi');
+  });
+
+  it('never lets the classifier override the out-of-scope patterns', async () => {
+    const { provider, complete } = provedorRoteirizado('posicao', null);
+    const { ultima } = await conversar('C-0001', ['Quanto rende meu CDB?'], AGORA_PADRAO, provider);
+    expect(ultima.resposta).toContain('não trato');
+    expect(complete).not.toHaveBeenCalled();
+  });
+
+  it('stops classifying once the conversation reached its LLM call budget', async () => {
+    const { provider, complete } = provedorRoteirizado();
+    const { assistente } = montar(provider);
+    const conversa = assistente.novaConversa('C-0001', AGORA_PADRAO);
+    conversa.chamadasLlm = 1000;
+    await assistente.responder({ clienteId: 'C-0001', conversaId: conversa.id, mensagem: 'Qual meu patrimônio?', agora: AGORA_PADRAO });
+    expect(complete).not.toHaveBeenCalled();
   });
 });
 

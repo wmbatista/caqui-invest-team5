@@ -1,9 +1,11 @@
 import type { MeuDinheiro, Movimento, PosicaoItem } from '@caqui/contracts';
 import type { ClienteRecord, PositionRepository, PosicaoRecord, ProdutoRecord } from '../data/position-repository.js';
 import { redigir } from '../redacao/redator.js';
+import { param } from '../regras/regras-caqui.js';
 import { brl, dataBr, horaBr, paraBrt, somarCentavos, somarDias, type DataISO } from './formato.js';
+import { classificarIntencao } from './intencao.js';
 import { calendarioDe, dataEfetiva, SOBRE_POSICAO } from './operacoes.js';
-import { fonteConta, fonteKb, type Fluxo } from './tipos.js';
+import { fonteConta, fonteKb, type Contexto, type Fluxo, type RespostaFluxo } from './tipos.js';
 
 const AVISO_BRUTO = 'Os valores dos investimentos são brutos, antes do imposto.';
 const ABERTOS = new Set(['pendente', 'em_processamento']);
@@ -83,6 +85,21 @@ export function calcularMeuDinheiro(repo: PositionRepository, cliente: ClienteRe
 
 export const posicao: Fluxo = async (ctx) => {
   if (ctx.sinais.has('nao_entendeu') || !SOBRE_POSICAO.test(ctx.normalizado)) return null;
+  return responderPosicao(ctx);
+};
+
+/**
+ * Último recurso, depois de todos os padrões: só pergunta ao LLM se a mensagem é sobre posição quando
+ * nenhum fluxo a reconheceu. Sem LLM, ou na dúvida, cai no "não entendi" como antes.
+ */
+export const posicaoPorIntencao: Fluxo = async (ctx) => {
+  if (ctx.sinais.has('nao_entendeu') || ctx.conversa.chamadasLlm >= param('CQ-08', 'max_passos')) return null;
+  ctx.conversa.chamadasLlm += 1;
+  if (await classificarIntencao(ctx.provider, ctx.texto) !== 'posicao') return null;
+  return responderPosicao(ctx);
+};
+
+async function responderPosicao(ctx: Contexto): Promise<RespostaFluxo> {
   const dados = calcularMeuDinheiro(ctx.repo, ctx.cliente, ctx.agora);
   const andamento = dados.movimentos.filter(({ emAndamento }) => emAndamento);
   const linhas = [
@@ -108,4 +125,4 @@ export const posicao: Fluxo = async (ctx) => {
     regras: ['CQ-C3', 'CQ-01'],
     fontes: [...fonteConta(ctx.cliente.id, ...dados.posicoes.map(({ id }) => id), ...andamento.map(({ id }) => id)), ...fonteKb(ctx, ...artigos)],
   };
-};
+}

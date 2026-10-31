@@ -19,6 +19,7 @@ export interface CompletionInput {
   system: string;
   messages: ChatMessage[];
   maxTokens: number;
+  temperature?: number;
 }
 
 export class ProviderError extends Error {
@@ -47,7 +48,7 @@ export class OpenRouterProvider implements ChatProvider {
           model: this.model,
           messages: [{ role: 'system', content: input.system }, ...input.messages],
           max_tokens: input.maxTokens,
-          temperature: 0.2,
+          temperature: input.temperature ?? 0.2,
           reasoning: { effort: this.config.effort },
         }),
         signal: controller.signal,
