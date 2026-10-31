@@ -7,6 +7,30 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
+### User Story 0 - Consultar quanto tenho aplicado (Priority: P0)
+
+Como cliente sintético, pergunto quanto tenho aplicado e recebo os totais corretos, a informação
+de saldo bruto e as fontes dos dados. A resposta funciona mesmo sem chave de LLM.
+
+**Why this priority**: É o caso ponta a ponta definido no ROADMAP-MVP0 e prova dados, backend,
+redação opcional e fontes antes das regras mais complexas.
+
+**Independent Test**: Consultar C-0001 sem chave e conferir R$ 60.000,00 aplicados,
+R$ 61.021,15 de saldo bruto, R$ 1.250,00 em conta e fontes P-0001, P-0002 e C-0001.
+
+**Acceptance Scenarios**:
+
+1. **Given** C-0001 e a pergunta "Quanto eu tenho aplicado?", **When** `/perguntar` é chamado,
+   **Then** os três valores de referência e as fontes são retornados.
+2. **Given** ausência de chave ou falha do OpenRouter, **When** a consulta é feita, **Then** o
+   template determinístico responde com os mesmos fatos.
+3. **Given** texto da LLM com valor inexistente, **When** a resposta é conferida, **Then** ela é
+   descartada e substituída pelo template.
+4. **Given** pergunta fora do escopo, **When** `/perguntar` é chamado, **Then** recebe resposta
+   fixa sem chamar a LLM.
+
+---
+
 ### User Story 1 - Conversar com a IA (Priority: P1)
 
 Como cliente, envio uma mensagem pelo frontend e recebo uma resposta textual mantendo o contexto enviado.
@@ -73,6 +97,13 @@ Como cliente, recebo orientação segura e humano quando relato golpe ou peço r
 - **FR-009**: MUST limitar duração das chamadas e mapear falhas previsivelmente.
 - **FR-010**: MUST permitir CORS somente para origens configuradas.
 - **FR-011**: O contrato MUST ser documentado e coberto por testes.
+- **FR-012**: MUST expor `POST /perguntar { id_cliente, pergunta }` retornando `resposta` e `fontes`.
+- **FR-013**: MUST ler `clientes.json` e `posicoes.csv` na subida e filtrar posições pelo cliente.
+- **FR-014**: MUST calcular total aplicado, saldo bruto e saldo em conta em código determinístico.
+- **FR-015**: MUST funcionar sem chave por meio de `NullProvider` e resposta por template.
+- **FR-016**: MUST rejeitar texto gerado que contenha valor monetário ausente dos fatos.
+- **FR-017**: MUST montar fontes em código com ids das posições e do cliente.
+- **FR-018**: MUST responder de forma fixa a perguntas fora da intenção de posição.
 
 ### Key Entities
 
@@ -90,6 +121,8 @@ Como cliente, recebo orientação segura e humano quando relato golpe ou peço r
 - **SC-003**: 100% dos testes de golpe e recomendação bloqueiam a chamada à IA.
 - **SC-004**: Trocar entre endpoints compatíveis exige somente alteração de ambiente.
 - **SC-005**: Nenhum segredo ou CPF completo aparece nos logs dos testes.
+- **SC-006**: C-0001 retorna exatamente os três valores e fontes definidos no ROADMAP-MVP0.
+- **SC-007**: 100% dos testes do endpoint passam sem chave e sem acesso à rede.
 
 ## Assumptions
 

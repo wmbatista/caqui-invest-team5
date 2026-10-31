@@ -68,7 +68,7 @@ M02 e a cadeia M03 a M07 são independentes e podem ser feitas em qualquer ordem
   `LLM_ENABLED`, `CLOCK_DEFAULT`); `.env.example` sem a chave.
 - **Pronto quando:** `npm run dev` sobe, o teste de `/health` passa e o `.env` está fora do git.
 
-### [ ] M02: Conexão com o OpenRouter · P
+### [x] M02: Conexão com o OpenRouter · P
 - **Ler antes:** a config da M01 e o contrato OpenAI-compatible `POST /chat/completions` do OpenRouter.
 - **Entregas:**
   - Interface `LlmProvider` com `complete({ system, messages, maxTokens })`.
@@ -191,3 +191,4 @@ horário e protocolo (T15), front (T17 a T20), custo e abuso (T23) e deploy (T24
 | --- | --- | --- |
 | 2026-10-31 | Planejamento | Roadmap MVP criado a partir do ROADMAP.md: só "onde está meu dinheiro", sem histórico nem sessão. |
 | 2026-10-31 | M01 | Workspace `apps/backend`, config tipada, `/health`, scripts e testes concluídos. E02 atualizado para OpenRouter via `fetch`. |
+| 2026-10-31 | M02 | Provider OpenRouter via `fetch`, `NullProvider`, timeout, validação, teste simulado e `llm:ping` concluídos. |

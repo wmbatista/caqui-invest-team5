@@ -61,7 +61,7 @@ as fontes.
   `DATA_DIR=../../dados`, `OPENROUTER_API_KEY`, `LLM_MODEL`); `.env.example` sem a chave.
 - **Pronto quando:** `npm run dev` sobe, o teste de `/health` passa e o `.env` está fora do git.
 
-### [ ] E02: Conexão com o OpenRouter · P
+### [x] E02: Conexão com o OpenRouter · P
 - **Ler antes:** a config da E01 e o contrato OpenAI-compatible `POST /chat/completions` do OpenRouter.
 - **Entregas:** função `redigir(system, texto)` com `fetch`, usando `Authorization: Bearer`,
   modelo configurado, validação do texto retornado e timeout curto; sem chave ou com erro,
@@ -69,7 +69,7 @@ as fontes.
 - **Pronto quando:** um teste com a chamada simulada passa, e `npm run llm:ping` responde com a
   chave no `.env`.
 
-### [ ] E03: Resumo da posição do cliente · P (testes primeiro)
+### [x] E03: Resumo da posição do cliente · P (testes primeiro)
 - **Ler antes:** `dados/README.md` (campos de `clientes.json` e `posicoes.csv`).
 - **Entregas:** leitura dos dois arquivos e a função
   `resumoPosicao(idCliente)` → `{ totalAplicado, saldoBrutoInvestimentos, saldoEmConta, posicoes[], fontes[] }`;
@@ -77,7 +77,7 @@ as fontes.
 - **Pronto quando:** o teste de C-0001 bate com a tabela "Caso de teste de referência" e o teste
   de cliente inexistente passa.
 
-### [ ] E04: Endpoint `/perguntar` · P
+### [x] E04: Endpoint `/perguntar` · P
 - **Ler antes:** as interfaces da E02 e da E03.
 - **Entregas:**
   - Reconhecer a intenção por palavras-chave, sem acento e sem diferença de maiúsculas ("quanto",
@@ -100,3 +100,4 @@ as fontes.
 | --- | --- | --- |
 | 2026-10-31 | Planejamento | MVP0 criado: só "quanto eu tenho aplicado?", a partir de `clientes.json` e `posicoes.csv`. |
 | 2026-10-31 | E01 | Scaffold concluído em `apps/backend`; E02 redefinido para OpenRouter com `fetch`. |
+| 2026-10-31 | E02–E04 | OpenRouter/NullProvider, resumo determinístico e `/perguntar` concluídos; ping real depende de chave local. |

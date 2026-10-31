@@ -1,13 +1,21 @@
 import type { ChatMessage } from '../domain/chat.js';
 import type { Config } from '../config.js';
 
-export interface ChatProvider {
+export interface LlmProvider {
   readonly name: string;
   readonly model: string;
-  complete(messages: ProviderMessage[]): Promise<string>;
+  complete(input: CompletionInput): Promise<string | null>;
 }
 
+export type ChatProvider = LlmProvider;
+
 export type ProviderMessage = ChatMessage | { role: 'system'; content: string };
+
+export interface CompletionInput {
+  system: string;
+  messages: ChatMessage[];
+  maxTokens: number;
+}
 
 export class ProviderError extends Error {
   constructor(message: string, readonly timedOut = false) { super(message); }
@@ -21,7 +29,7 @@ export class OpenRouterProvider implements ChatProvider {
     this.model = config.model;
   }
 
-  async complete(messages: ProviderMessage[]): Promise<string> {
+  async complete(input: CompletionInput): Promise<string> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
     try {
@@ -33,7 +41,8 @@ export class OpenRouterProvider implements ChatProvider {
         },
         body: JSON.stringify({
           model: this.model,
-          messages,
+          messages: [{ role: 'system', content: input.system }, ...input.messages],
+          max_tokens: input.maxTokens,
           temperature: 0.2,
           reasoning: { effort: this.config.effort },
         }),
@@ -51,5 +60,14 @@ export class OpenRouterProvider implements ChatProvider {
     } finally {
       clearTimeout(timer);
     }
+  }
+}
+
+export class NullProvider implements LlmProvider {
+  readonly name = 'none';
+  readonly model = 'template';
+
+  async complete(_input: CompletionInput): Promise<null> {
+    return null;
   }
 }

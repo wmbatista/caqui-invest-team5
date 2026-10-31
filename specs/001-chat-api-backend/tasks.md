@@ -30,3 +30,12 @@
 
 - [x] T012 Documentar contrato, setup e limitações
 - [x] T013 Instalar dependências e executar quality gate
+
+## Phase 7: MVP0 `/perguntar`
+
+- [x] T014 [US1] Implementar `LlmProvider`, `OpenRouterProvider` com `fetch` e `NullProvider`
+- [x] T015 [US1] Criar `npm run llm:ping` e teste simulado do OpenRouter
+- [x] T016 [US1] Ler clientes e posições uma vez e calcular `resumoPosicao`
+- [x] T017 [US1] Implementar intenção restrita e `POST /perguntar`
+- [x] T018 [US1] Validar valores da LLM e usar template em falha ou divergência
+- [x] T019 [US1] Testar C-0001, isolamento, fora de escopo, erros e fontes

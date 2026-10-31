@@ -10,6 +10,7 @@
     "dev": "npm run dev --workspace=@caqui/backend",
     "build": "npm run build --workspace=@caqui/backend",
     "start": "npm run start --workspace=@caqui/backend",
+    "llm:ping": "npm run llm:ping --workspace=@caqui/backend",
     "typecheck": "npm run typecheck --workspace=@caqui/backend",
     "test": "npm run test --workspace=@caqui/backend",
     "check": "npm run check --workspace=@caqui/backend"

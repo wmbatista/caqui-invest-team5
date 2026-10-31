@@ -11,9 +11,15 @@ npm install
 npm run dev
 ```
 
-O contrato principal é `POST /api/v1/chat`; veja a [especificação](specs/001-chat-api-backend/spec.md),
+O endpoint do MVP0 é `POST /perguntar`; veja a [especificação](specs/001-chat-api-backend/spec.md),
 o [OpenAPI](specs/001-chat-api-backend/contracts/openapi.yaml) e o [quickstart](specs/001-chat-api-backend/quickstart.md).
 Este MVP não persiste conversas: o frontend reenvia o histórico em cada chamada.
+
+```bash
+curl -X POST http://localhost:3000/perguntar \
+  -H 'content-type: application/json' \
+  -d '{"id_cliente":"C-0001","pergunta":"Quanto eu tenho aplicado?"}'
+```
 
 Case aberto do **Hands On com IA: da concepção à produção**, 31/10/2026.
 

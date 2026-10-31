@@ -3,6 +3,22 @@ info:
   title: Caqui Chat API
   version: 0.1.0
 paths:
+  /perguntar:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerguntarRequest'
+      responses:
+        '200':
+          description: Resposta factual com fontes
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PerguntarResponse' }
+        '400': { description: Requisição inválida }
+        '404': { description: Cliente não encontrado }
   /health:
     get:
       responses:
@@ -26,6 +42,20 @@ paths:
         '504': { description: Provider timeout }
 components:
   schemas:
+    PerguntarRequest:
+      type: object
+      required: [id_cliente, pergunta]
+      properties:
+        id_cliente: { type: string, pattern: '^C-\d{4}$' }
+        pergunta: { type: string, minLength: 1, maxLength: 4000 }
+    PerguntarResponse:
+      type: object
+      required: [resposta, fontes]
+      properties:
+        resposta: { type: string }
+        fontes:
+          type: array
+          items: { type: string }
     Message:
       type: object
       required: [role, content]
