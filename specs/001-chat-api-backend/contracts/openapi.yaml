@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Caqui Chat API
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: Service is healthy }
+  /api/v1/chat:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Chat response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatResponse' }
+        '400': { description: Invalid request }
+        '502': { description: Provider failure }
+        '504': { description: Provider timeout }
+components:
+  schemas:
+    Message:
+      type: object
+      required: [role, content]
+      properties:
+        role: { type: string, enum: [user, assistant] }
+        content: { type: string, minLength: 1, maxLength: 4000 }
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1, maxLength: 4000 }
+        conversationId: { type: string, format: uuid }
+        history:
+          type: array
+          maxItems: 20
+          items: { $ref: '#/components/schemas/Message' }
+    ChatResponse:
+      type: object
+      required: [conversationId, message, provider, model, action]
+      properties:
+        conversationId: { type: string, format: uuid }
+        message: { type: string }
+        provider: { type: string }
+        model: { type: string }
+        action: { type: string, enum: [respond, human_handoff, security_handoff] }

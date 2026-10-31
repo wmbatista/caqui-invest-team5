@@ -1,5 +1,20 @@
 # Caqui Invest: atendimento que escala com confiança
 
+## MVP do grupo: Caqui Chat API
+
+O repositório agora inclui um backend Node.js/TypeScript para o frontend enviar mensagens a uma
+LLM via OpenRouter usando sua API OpenAI-compatible.
+
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
+
+O contrato principal é `POST /api/v1/chat`; veja a [especificação](specs/001-chat-api-backend/spec.md),
+o [OpenAPI](specs/001-chat-api-backend/contracts/openapi.yaml) e o [quickstart](specs/001-chat-api-backend/quickstart.md).
+Este MVP não persiste conversas: o frontend reenvia o histórico em cada chamada.
+
 Case aberto do **Hands On com IA: da concepção à produção**, 31/10/2026.
 
 A Caqui Invest é uma corretora fictícia que vai sair de 400 mil para 2 milhões de clientes em 18 meses, e o time de atendimento só pode ir de 62 para 100 pessoas. O desafio é atender essa base sem a satisfação cair e sem perder a confiança de quem está entregando o próprio patrimônio.

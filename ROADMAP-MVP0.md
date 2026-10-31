@@ -3,7 +3,7 @@
 Uma implementação de ponta a ponta que funciona num único cenário: **o cliente pergunta quanto
 tem aplicado e o agente responde certo, com a fonte.**
 
-Serve para provar a estrutura (backend, dados, Claude, resposta com fonte) antes de qualquer regra
+Serve para provar a estrutura (backend, dados, OpenRouter, resposta com fonte) antes de qualquer regra
 difícil. Os próximos passos estão em [ROADMAP-MVP.md](ROADMAP-MVP.md) (prazos e liquidação) e em
 [ROADMAP.md](ROADMAP.md) (versão completa).
 
@@ -29,7 +29,7 @@ sessão, histórico, humano, front e deploy.
 | Tema | Decisão |
 | --- | --- |
 | Stack | Node 22 + TypeScript + Fastify + Vitest, em `apps/backend` |
-| LLM | `@anthropic-ai/sdk`, modelo em `LLM_MODEL` (padrão `claude-opus-5-5`), chave em `ANTHROPIC_API_KEY` no `.env` |
+| LLM | OpenRouter via `fetch`, modelo em `LLM_MODEL` (padrão `openai/gpt-4o-mini`), chave em `OPENROUTER_API_KEY` no `.env` |
 | Sem chave | Resposta por template; os testes não chamam a API |
 | Dados | Só `dados/clientes.json` e `dados/posicoes.csv`, lidos na subida |
 | Cliente | `id_cliente` no corpo da requisição (simplificação; sessão vem depois) |
@@ -55,17 +55,17 @@ as fontes.
 
 ---
 
-### [ ] E01: Scaffold do backend · P
+### [x] E01: Scaffold do backend · P
 - **Entregas:** `package.json` raiz com workspaces; `apps/backend` com TypeScript estrito, Fastify,
   Vitest e os scripts `dev`, `build`, `test`; `GET /health`; config a partir do `.env` (`PORT`,
-  `DATA_DIR=../../dados`, `ANTHROPIC_API_KEY`, `LLM_MODEL`); `.env.example` sem a chave.
+  `DATA_DIR=../../dados`, `OPENROUTER_API_KEY`, `LLM_MODEL`); `.env.example` sem a chave.
 - **Pronto quando:** `npm run dev` sobe, o teste de `/health` passa e o `.env` está fora do git.
 
-### [ ] E02: Conexão com a Claude · P
-- **Ler antes:** a config da E01. Use a skill `claude-api` (TypeScript) para escrever a chamada.
-- **Entregas:** função `redigir(system, texto)` com `@anthropic-ai/sdk`, que checa o
-  `stop_reason` antes de ler o texto e tem timeout curto; sem chave ou com erro, retorna `null`
-  para quem chamou usar o template.
+### [ ] E02: Conexão com o OpenRouter · P
+- **Ler antes:** a config da E01 e o contrato OpenAI-compatible `POST /chat/completions` do OpenRouter.
+- **Entregas:** função `redigir(system, texto)` com `fetch`, usando `Authorization: Bearer`,
+  modelo configurado, validação do texto retornado e timeout curto; sem chave ou com erro,
+  retorna `null` para quem chamou usar o template.
 - **Pronto quando:** um teste com a chamada simulada passa, e `npm run llm:ping` responde com a
   chave no `.env`.
 
@@ -83,9 +83,9 @@ as fontes.
   - Reconhecer a intenção por palavras-chave, sem acento e sem diferença de maiúsculas ("quanto",
     "tenho", "aplicado", "saldo", "onde está meu dinheiro"). Fora disso, resposta fixa.
   - Montar os fatos com a E03, valores formatados em R$ pelo código.
-  - Pedir à Claude que redija 2 ou 3 frases simples **usando só os fatos**, sem calcular e sem
+  - Pedir ao modelo via OpenRouter que redija 2 ou 3 frases simples **usando só os fatos**, sem calcular e sem
     recomendar. A pergunta do cliente vai marcada como dado, não como instrução.
-  - Conferir se todo valor em R$ do texto existe nos fatos; se não existir, ou se a Claude não
+  - Conferir se todo valor em R$ do texto existe nos fatos; se não existir, ou se o modelo não
     responder, usar o template.
   - As fontes são montadas pelo código, nunca tiradas do texto do LLM.
 - **Pronto quando:** sem chave, o teste de C-0001 retorna os valores e as fontes certos pelo
@@ -99,3 +99,4 @@ as fontes.
 | Data | Tarefa | Notas |
 | --- | --- | --- |
 | 2026-10-31 | Planejamento | MVP0 criado: só "quanto eu tenho aplicado?", a partir de `clientes.json` e `posicoes.csv`. |
+| 2026-10-31 | E01 | Scaffold concluído em `apps/backend`; E02 redefinido para OpenRouter com `fetch`. |

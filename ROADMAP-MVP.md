@@ -34,7 +34,7 @@ vulnerável, limite de passos, reclamação e encerramento, front completo, depl
 | Tema | Decisão |
 | --- | --- |
 | Stack | Node 22 + TypeScript + Fastify + Zod + Vitest, em `apps/backend` |
-| LLM | `@anthropic-ai/sdk`, modelo em `LLM_MODEL` (padrão `claude-opus-5-5`), `effort` baixo; a chave fica em `ANTHROPIC_API_KEY` no `.env` |
+| LLM | OpenRouter via `fetch`, modelo em `LLM_MODEL` (padrão `openai/gpt-4o-mini`), `effort` baixo; a chave fica em `OPENROUTER_API_KEY` no `.env` |
 | Papel do LLM | Só redige o texto a partir de fatos já calculados. Datas, valores e status vêm de código (princípio II) |
 | Sem LLM | `NullProvider` responde por template; os testes rodam sem chave |
 | Cliente | `id_cliente` vem no corpo da requisição. É uma simplificação do MVP: a sessão entra na T12 do roadmap completo |
@@ -60,20 +60,20 @@ M02 e a cadeia M03 a M07 são independentes e podem ser feitas em qualquer ordem
 
 ---
 
-### [ ] M01: Scaffold do backend · P
+### [x] M01: Scaffold do backend · P
 - **Ler antes:** este arquivo (Decisões de base).
 - **Entregas:** `package.json` raiz com workspaces; `apps/backend` com TypeScript estrito,
   Fastify, Zod, Vitest e os scripts `dev`, `build`, `test`; `GET /health`; config tipada a partir
-  do `.env` (`PORT`, `DATA_DIR=../../dados`, `ANTHROPIC_API_KEY`, `LLM_MODEL`, `LLM_EFFORT`,
+  do `.env` (`PORT`, `DATA_DIR=../../dados`, `OPENROUTER_API_KEY`, `LLM_MODEL`, `LLM_EFFORT`,
   `LLM_ENABLED`, `CLOCK_DEFAULT`); `.env.example` sem a chave.
 - **Pronto quando:** `npm run dev` sobe, o teste de `/health` passa e o `.env` está fora do git.
 
-### [ ] M02: Conexão com a Claude · P
-- **Ler antes:** a config da M01. Use a skill `claude-api` (TypeScript) para escrever a chamada.
+### [ ] M02: Conexão com o OpenRouter · P
+- **Ler antes:** a config da M01 e o contrato OpenAI-compatible `POST /chat/completions` do OpenRouter.
 - **Entregas:**
   - Interface `LlmProvider` com `complete({ system, messages, maxTokens })`.
-  - `ClaudeProvider`: `client.messages.create`, modelo e `effort` vindos da config, checagem de
-    `stop_reason` antes de ler o texto, erros tipados e timeout curto.
+  - `OpenRouterProvider`: chamada com `fetch` para `/chat/completions`, `Authorization: Bearer`,
+    modelo e `effort` vindos da config, validação da resposta, erros tipados e timeout curto.
   - `NullProvider`, que é usado quando `LLM_ENABLED=false` ou não há chave.
 - **Pronto quando:** o teste com provider falso passa, e com a chave no `.env` um script
   `npm run llm:ping` recebe resposta.
@@ -139,7 +139,7 @@ M02 e a cadeia M03 a M07 são independentes e podem ser feitas em qualquer ordem
     instrução.
   - Se houver mais de uma operação candidata, pedir que o cliente escolha, mostrando as opções.
 - **Pronto quando:** com `NullProvider`, os testes de integração passam em PT-01 a PT-05, PT-31 e
-  "onde está meu dinheiro?" para C-0001; com a Claude, 3 perguntas manuais ficam registradas nas
+  "onde está meu dinheiro?" para C-0001; com o OpenRouter, 3 perguntas manuais ficam registradas nas
   notas.
 
 ### [ ] M09: Triagem mínima · P
@@ -190,3 +190,4 @@ horário e protocolo (T15), front (T17 a T20), custo e abuso (T23) e deploy (T24
 | Data | Tarefa | Notas |
 | --- | --- | --- |
 | 2026-10-31 | Planejamento | Roadmap MVP criado a partir do ROADMAP.md: só "onde está meu dinheiro", sem histórico nem sessão. |
+| 2026-10-31 | M01 | Workspace `apps/backend`, config tipada, `/health`, scripts e testes concluídos. E02 atualizado para OpenRouter via `fetch`. |
