@@ -19,8 +19,8 @@ const caso: Caso = {
   nome: 'Marta Siqueira',
   idade: 63,
   historico: [
-    { autor: 'cliente', texto: 'Pediram minha senha <b>agora</b>', regras: [] },
-    { autor: 'caqui', texto: 'Não passe nada.', acao: 'seguranca_imediata', regras: ['CQ-05'] },
+    { autor: 'cliente', texto: 'Pediram minha senha <b>agora</b>' },
+    { autor: 'caqui', texto: 'Não passe nada.', acao: 'seguranca_imediata' },
   ],
 };
 
@@ -39,7 +39,7 @@ describe('tela do atendente', () => {
     await userEvent.setup().click(await screen.findByRole('button', { name: /Marta Siqueira/ }));
     expect(screen.getByText(/Motivo: suspeita de golpe/)).toBeVisible();
     expect(screen.getByText('Não passe nada.')).toBeVisible();
-    expect(screen.getByText('CQ-05')).toBeVisible();
+    expect(document.body.textContent).not.toMatch(/CQ-(?:C|D)?\d{1,2}\b/);
   });
 
   it('shows the history as plain text', async () => {

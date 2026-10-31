@@ -1,10 +1,9 @@
-import type { ConversaCriada, Eu, MeuDinheiro, RegraPublica, RespostaChat } from '@caqui/contracts';
+import type { ConversaCriada, Eu, MeuDinheiro, RespostaChat } from '@caqui/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { chamar, ErroApi } from '../api';
 import { Chat, type MensagemTela } from '../componentes/Chat';
 import { MeuDinheiroPainel } from '../componentes/MeuDinheiro';
 import { Relogio } from '../componentes/Relogio';
-import { SaidaHumano } from '../componentes/SaidaHumano';
 
 interface Props {
   euInicial: Eu;
@@ -16,10 +15,9 @@ export function Cliente({ euInicial, aoSair, aoBloquear }: Props) {
   const primeiroNome = (euInicial.cliente?.nome ?? euInicial.nome).split(' ')[0];
   const [eu, setEu] = useState(euInicial);
   const [dinheiro, setDinheiro] = useState<MeuDinheiro | null>(null);
-  const [regras, setRegras] = useState<Record<string, RegraPublica>>({});
   const [mensagens, setMensagens] = useState<MensagemTela[]>([{
     autor: 'caqui',
-    texto: `Olá, ${primeiroNome}. Aqui você confere onde está o seu dinheiro, com a data e de onde veio cada informação. Se preferir, uma pessoa atende pelo botão Falar com uma pessoa, a qualquer momento.`,
+    texto: `Olá, ${primeiroNome}. Aqui você confere onde está o seu dinheiro e quando ele cai. Se preferir, uma pessoa atende pelo botão Falar com uma pessoa, a qualquer momento.`,
   }]);
   const conversa = useRef<Promise<string> | null>(null);
 
@@ -36,15 +34,12 @@ export function Cliente({ euInicial, aoSair, aoBloquear }: Props) {
 
   useEffect(() => {
     void atualizar().catch(() => undefined);
-    void chamar<RegraPublica[]>('/regras')
-      .then((lista) => setRegras(Object.fromEntries(lista.map((regra) => [regra.code, regra]))))
-      .catch(() => undefined);
   }, [atualizar]);
 
-  const enviar = useCallback(async (texto: string) => {
+  const enviar = useCallback(async (texto: string, exibir?: string) => {
     const limpo = texto.trim();
     if (!limpo) return;
-    setMensagens((atuais) => [...atuais, { autor: 'cliente', texto: limpo }]);
+    setMensagens((atuais) => [...atuais, { autor: 'cliente', texto: exibir ?? limpo }]);
     const envio = async () => chamar<RespostaChat>('/chat', { method: 'POST', corpo: { conversaId: await conversaAtual(), mensagem: limpo } });
     try {
       let resposta: RespostaChat;
@@ -72,16 +67,15 @@ export function Cliente({ euInicial, aoSair, aoBloquear }: Props) {
     <>
       <header>
         <div className="marca"><i /> Caqui Invest</div>
-        <div>Olá, <b>{primeiroNome}</b> · CPF {eu.cliente?.cpfMascarado} · <button type="button" onClick={aoSair}>Sair</button></div>
+        <div>Olá, <b>{primeiroNome}</b> · <button type="button" onClick={aoSair}>Sair</button></div>
       </header>
-      {eu.humano && <SaidaHumano humano={eu.humano} aoEnviar={enviar} />}
       <Relogio agora={eu.agora} aoMudar={atualizar} />
       <main>
         <section className="cartao">
           <h2>Meu dinheiro</h2>
           {dinheiro ? <MeuDinheiroPainel dados={dinheiro} /> : <p>Carregando…</p>}
         </section>
-        <Chat mensagens={mensagens} regras={regras} aoEnviar={enviar} />
+        <Chat mensagens={mensagens} humano={eu.humano} aoEnviar={enviar} />
       </main>
     </>
   );

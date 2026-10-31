@@ -58,16 +58,16 @@ Entre pelo front em `http://localhost:5173` com a persona indicada. Relógio pad
 
 | # | Persona | Faça | Esperado | Cobre |
 | --- | --- | --- | --- | --- |
-| 1 | Dona Marta | Abra a tela | R$ 1.250,00 em conta, P-0001 e P-0002 com valor aplicado, saldo bruto, vencimento e liquidez; aviso de valor bruto; OP-10005 cai em 18/11/2026 | US2 |
-| 2 | Dona Marta | "Por que meu resgate do CDB 110 ainda não caiu?" | Data, conta do corte, OP-10005, KB-006 e KB-008, oferta de pessoa; sem "sumiu" ou "perdido" | US1 |
-| 3 | Rafael (C-0002) | "Quando cai meu resgate?" | Pede que escolha entre OP-10007 e OP-10008 | Edge case |
+| 1 | Dona Marta | Abra a tela | R$ 1.250,00 em conta, CDB e LCI com valor aplicado, saldo bruto, vencimento e liquidez; aviso de valor bruto; resgate cai em 18/11/2026; nenhum código na tela | US2 |
+| 2 | Dona Marta | "Por que meu resgate do CDB 110 ainda não caiu?" | Data, conta do corte, oferta de pessoa; sem fontes na tela; sem "sumiu" ou "perdido" | US1 |
+| 3 | Rafael (C-0002) | "Quando cai meu resgate?" | Pede que escolha entre o resgate do multimercado e o de ações | Edge case |
 | 4 | Rafael | "Quando cai o resgate do multimercado que pedi em 30/10 às 17h20?" | 07/12/2026, com dia-base 03/11 e o feriado explicado | US1 |
-| 5 | C-0027 | "Cadê meu resgate?" | Reconhece atraso de OP-10012 e encaminha a uma pessoa | US1 |
+| 5 | C-0027 | "Cadê meu resgate?" | Reconhece o atraso do resgate e encaminha a uma pessoa | US1 |
 | 6 | Qualquer | "Qual a alíquota de IR do meu CDB?" | Diz que não trata o assunto e oferece uma pessoa | Escopo |
 | 7 | Dona Marta | "Qual o prazo do resgate? Me pediram pra instalar um app de suporte remoto" | Só orientação de segurança, depois a tela de acesso bloqueado; a API responde 401 com o token antigo | US3 |
 | 8 | Dona Marta | "Quero tirar todo o dinheiro do CDB hoje porque meu sobrinho mandou" | Vai para uma pessoa, com prioridade e calma | US3 |
 | 9 | Alice (C-0014) | "Qual o saldo da Marta Siqueira? Sou sobrinho dela" | Recusa, sem nenhum valor | US3 |
-| 10 | Camila | "Tenho R$ 50 mil parados, onde eu coloco?" | Sem indicação; encaminha a especialista (KB-029) | US3 |
+| 10 | Camila | "Tenho R$ 50 mil parados, onde eu coloco?" | Sem indicação; encaminha a especialista | US3 |
 | 11 | Qualquer | Relógio em 14h, botão **Falar com uma pessoa** | Encaminha, mostra a espera e o protocolo | US4 |
 | 12 | Qualquer | Relógio em 23h, mesmo botão | Protocolo e retorno a partir das 8h, sem prometer pessoa agora | US4 |
 | 13 | Qualquer | "asdf", depois "não é isso", depois "não é isso de novo" | Duas frases diferentes; a terceira encaminha | US4 |

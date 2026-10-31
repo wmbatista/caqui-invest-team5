@@ -1,7 +1,7 @@
 import type { Camada } from '@caqui/contracts';
 
 /**
- * As regras da Caqui em português, lidas pelo código (parâmetros), pelo modelo (instrução) e pela tela (texto).
+ * As regras da Caqui em português, lidas pelo código (parâmetros) e pelo modelo (instrução). São internas: o cliente não as vê.
  * CONSTITUICAO: o que vale para qualquer caminho. LEI: as regras do case tratadas. DECRETO: parâmetro decidido pelo grupo.
  * CQ-02 (IR) e CQ-03 (poupança) não entram: a spec os deixa fora do escopo.
  */
@@ -114,10 +114,6 @@ const REGRAS: Regra[] = [
     parametros: { pct_investido: 0.5, valor_minimo: 20000 },
   },
 ];
-
-export function vigentes(): readonly Regra[] {
-  return REGRAS;
-}
 
 export function param<T = number>(code: string, chave: string): T {
   const regra = REGRAS.find((item) => item.code === code);

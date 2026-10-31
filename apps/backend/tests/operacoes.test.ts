@@ -53,7 +53,8 @@ describe('cenários da US1', () => {
     expect(ultima.resposta).toContain('12/11/2026');
     expect(ids(ultima)).toEqual(expect.arrayContaining(['OP-10012', 'KB-008']));
     expect(ultima.resposta.toLowerCase()).not.toContain('sumiu');
-    expect(estado.fila()[0].motivo).toContain('OP-10012');
+    expect(estado.fila()[0].motivo).toContain('liquidação atrasada');
+    expect(estado.fila()[0].motivo).not.toMatch(/OP-\d/);
   });
 
   it('explains a refused redemption and says the money stays invested', async () => {
@@ -93,6 +94,15 @@ describe('casos de borda', () => {
     const { ultima } = await conversar('C-0002', ['Quando cai meu resgate?', 'OP-10007']);
     expect(ultima.resposta).toContain('07/12/2026');
     expect(ultima.opcoes).toBeUndefined();
+  });
+
+  it('keeps the chosen option by name in the history the attendant reads', async () => {
+    const { estado, conversa } = await conversar('C-0002', ['Quando cai meu resgate?', 'OP-10007', 'OP-10005']);
+    const doCliente = estado.historico(conversa.id).filter(({ autor }) => autor === 'cliente').map(({ texto }) => texto);
+    expect(doCliente[1]).toContain('Caqui Multimercado FIF');
+    expect(doCliente[1]).not.toContain('OP-10007');
+    // Id de outro cliente não vira nome: fica como foi digitado.
+    expect(doCliente[2]).toBe('OP-10005');
   });
 
   it('never reveals an operation of another client by id', async () => {

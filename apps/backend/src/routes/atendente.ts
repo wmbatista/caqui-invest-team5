@@ -28,7 +28,7 @@ export function rotasAtendente(app: FastifyInstance, repo: PositionRepository, e
         momento: momentoCurto(caso.momento),
         nome: cliente.nome,
         idade: cliente.idade,
-        historico: estado.historico(caso.conversaId).map(({ autor, texto, acao, regras }) => ({ autor, texto, ...(acao ? { acao } : {}), regras })),
+        historico: estado.historico(caso.conversaId).map(({ autor, texto, acao }) => ({ autor, texto, ...(acao ? { acao } : {}) })),
       };
     });
   });

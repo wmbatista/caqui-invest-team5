@@ -13,22 +13,35 @@ export function MeuDinheiroPainel({ dados }: { dados: MeuDinheiro }) {
     <>
       <div className="fonte">Hoje, {dados.hoje}</div>
       <div className="total">{dados.total}</div>
-      <div className="fonte">{dados.avisoBruto} Dados da sua conta.</div>
-      <div className="linha">Saldo em conta: <b>{dados.saldoEmConta}</b></div>
+      <div className="fonte">{dados.avisoBruto}</div>
+      <div className="linha item">
+        <span>Saldo em conta</span>
+        <b>{dados.saldoEmConta}</b>
+      </div>
       {dados.posicoes.map((posicao) => (
         <div className="linha" key={posicao.id}>
-          {posicao.texto} <span className="fonte">· {posicao.id}</span>
+          <div className="item">
+            <span>{posicao.produto}</span>
+            <b>{posicao.saldoBruto}</b>
+          </div>
+          <div className="fonte">
+            Aplicado {posicao.valorAplicado} em {posicao.dataAplicacao} · {posicao.liquidez}
+            {posicao.vencimento ? ` · vence em ${posicao.vencimento}` : ''}
+          </div>
+          {posicao.observacao && <div className="observacao">{posicao.observacao}</div>}
         </div>
       ))}
       {movimentos.length > 0 && <h2 className="subtitulo">Em andamento</h2>}
       {movimentos.map((movimento) => (
         <div className="linha" key={movimento.id}>
           <span className={`pill ${movimento.status}`}>{movimento.status.replace('_', ' ')}</span>{' '}
-          {movimento.atrasada && <span className="pill recusada">atrasada</span>}{' '}
-          {TIPO[movimento.tipo]} de <b>{movimento.valor}</b> · {movimento.produto}
-          <br />
-          {movimento.status === 'recusada' ? movimento.observacao : <>Cai em <b>{movimento.caiEm}</b></>}{' '}
-          <span className="fonte">· pedido em {movimento.pedidoEm} · {movimento.id}</span>
+          {movimento.atrasada && <span className="pill recusada">atrasada</span>}
+          <div className="item">
+            <span>{TIPO[movimento.tipo]} · {movimento.produto}</span>
+            <b>{movimento.valor}</b>
+          </div>
+          <div>{movimento.status === 'recusada' ? movimento.observacao : <>Cai em <b>{movimento.caiEm}</b></>}</div>
+          <div className="fonte">Pedido em {movimento.pedidoEm}</div>
         </div>
       ))}
     </>

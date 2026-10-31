@@ -2,9 +2,13 @@ import type { RespostaChat } from '@caqui/contracts';
 import { param } from '../regras/regras-caqui.js';
 import { mascararCpf, normalizar, sinais } from '../triagem/guarda.js';
 import { paraHumano, saidaHumano, temSinalVulneravel } from './humano.js';
+import { trocarIdsPorNomes } from './operacoes.js';
 import { fonteKb, type Contexto, type Dependencias, type Fluxo, type RespostaFluxo } from './tipos.js';
 
 export class ConversaNaoEncontrada extends Error {}
+
+/** As regras aplicadas ficam no histórico do atendente e na avaliação; a rota do cliente não as envia. */
+export type RespostaInterna = RespostaChat & { regras: string[] };
 
 const FRASES_NAO_ENTENDI = [
   'Não entendi. Você pode me dizer de outro jeito? Por exemplo: "meu dinheiro está lá?" ou "quando cai meu resgate?".',
@@ -37,19 +41,20 @@ export class Assistente {
     return this.deps.estado.criarConversa(clienteId, agora);
   }
 
-  async responder(entrada: { clienteId: string; conversaId: string; mensagem: string; agora: number }): Promise<RespostaChat> {
+  async responder(entrada: { clienteId: string; conversaId: string; mensagem: string; agora: number }): Promise<RespostaInterna> {
     const { clienteId, conversaId, agora } = entrada;
     const { estado, repo } = this.deps;
     const conversa = estado.buscarConversa(conversaId, clienteId);
     if (!conversa) throw new ConversaNaoEncontrada();
 
     const texto = mascararCpf(entrada.mensagem.trim()).slice(0, 2000);
-    estado.registrarMensagem({ conversaId, autor: 'cliente', texto, regras: [], fontes: [], momento: agora });
+    const cliente = repo.getCliente(clienteId);
+    estado.registrarMensagem({ conversaId, autor: 'cliente', texto: trocarIdsPorNomes(texto, { repo, cliente, agora }), regras: [], fontes: [], momento: agora });
     conversa.passos += 1;
 
     const ctx: Contexto = {
       ...this.deps,
-      cliente: repo.getCliente(clienteId),
+      cliente,
       conversa,
       texto,
       normalizado: normalizar(texto),

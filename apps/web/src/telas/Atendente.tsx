@@ -55,11 +55,6 @@ export function Atendente({ aoSair }: { aoSair: () => void }) {
               {caso.historico.map((mensagem, indice) => (
                 <div key={indice} className={`msg ${mensagem.autor} historico`}>
                   <span>{mensagem.texto}</span>
-                  {mensagem.regras.length > 0 && (
-                    <div className="chips">
-                      {[...new Set(mensagem.regras)].map((regra) => <span key={regra} className="chip regra">{regra}</span>)}
-                    </div>
-                  )}
                 </div>
               ))}
             </>

@@ -185,25 +185,6 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Erro' }
-  /api/v1/regras:
-    get:
-      summary: Regras vigentes em português, para os chips da tela
-      responses:
-        '200':
-          description: Regras por hierarquia
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  required: [code, titulo, camada, texto]
-                  properties:
-                    code: { type: string, example: CQ-05 }
-                    titulo: { type: string }
-                    camada: { type: string, enum: [CONSTITUICAO, LEI, DECRETO] }
-                    texto: { type: string }
-        '401': { $ref: '#/components/responses/SemSessao' }
   /api/v1/atendente/fila:
     get:
       summary: Fila com protocolo, resumo e histórico (só atendente)
@@ -262,8 +243,8 @@ components:
       required: [tipo, id]
       properties:
         tipo: { type: string, enum: [kb, conta] }
-        id: { type: string, description: 'KB-006, OP-10005, P-0001. KB-007 nunca aparece.' }
-        titulo: { type: string }
+        id: { type: string, description: 'Só para rastreio: KB-006, OP-10005, P-0001. A tela mostra o titulo. KB-007 nunca aparece.' }
+        titulo: { type: string, description: Nome legível da fonte, exibido ao cliente }
     SaidaHumano:
       type: object
       required: [disponivel, prioridade]
@@ -280,7 +261,7 @@ components:
         descricao: { type: string }
     RespostaChat:
       type: object
-      required: [conversaId, protocolo, resposta, acao, fontes, regras, humano, sessaoBloqueada, passo, geradoPor]
+      required: [conversaId, protocolo, resposta, acao, fontes, humano, sessaoBloqueada, passo, geradoPor]
       properties:
         conversaId: { type: string, format: uuid }
         protocolo: { type: string, example: CQ-20261118-0001 }
@@ -289,9 +270,6 @@ components:
         fontes:
           type: array
           items: { $ref: '#/components/schemas/Fonte' }
-        regras:
-          type: array
-          items: { type: string, example: CQ-01 }
         humano: { $ref: '#/components/schemas/SaidaHumano' }
         sessaoBloqueada:
           type: boolean
@@ -314,6 +292,7 @@ components:
         vencimento: { type: string, nullable: true }
         liquidez: { type: string }
         oscila: { type: boolean, description: Ações e multimercado; sem projeção de rendimento }
+        observacao: { type: string, nullable: true, description: 'Carência, vencimento ou oscilação, em linguagem simples' }
         texto: { type: string }
     Movimento:
       type: object
@@ -346,14 +325,11 @@ components:
           items: { $ref: '#/components/schemas/Movimento' }
     MensagemHistorico:
       type: object
-      required: [autor, texto, regras]
+      required: [autor, texto]
       properties:
         autor: { type: string, enum: [cliente, caqui] }
         texto: { type: string, description: CPF já mascarado }
         acao: { $ref: '#/components/schemas/Acao' }
-        regras:
-          type: array
-          items: { type: string }
     Caso:
       type: object
       required: [id, protocolo, destino, prioridade, motivo, resumo, status, momento, nome, idade, historico]

@@ -55,7 +55,6 @@ export const respostaChatSchema = z.object({
   resposta: z.string(),
   acao: acaoSchema,
   fontes: z.array(fonteSchema),
-  regras: z.array(z.string()),
   humano: saidaHumanoSchema,
   sessaoBloqueada: z.boolean(),
   opcoes: z.array(z.object({ id: z.string(), descricao: z.string() })).optional(),
@@ -72,6 +71,7 @@ export const posicaoItemSchema = z.object({
   vencimento: z.string().nullable(),
   liquidez: z.string(),
   oscila: z.boolean(),
+  observacao: z.string().nullable(),
   texto: z.string(),
 });
 
@@ -98,18 +98,10 @@ export const meuDinheiroSchema = z.object({
   movimentos: z.array(movimentoSchema),
 });
 
-export const regraPublicaSchema = z.object({
-  code: z.string(),
-  titulo: z.string(),
-  camada: camadaSchema,
-  texto: z.string(),
-});
-
 export const mensagemHistoricoSchema = z.object({
   autor: z.enum(['cliente', 'caqui']),
   texto: z.string(),
   acao: acaoSchema.optional(),
-  regras: z.array(z.string()),
 });
 
 export const casoSchema = z.object({
@@ -145,7 +137,6 @@ export type RespostaChat = z.infer<typeof respostaChatSchema>;
 export type PosicaoItem = z.infer<typeof posicaoItemSchema>;
 export type Movimento = z.infer<typeof movimentoSchema>;
 export type MeuDinheiro = z.infer<typeof meuDinheiroSchema>;
-export type RegraPublica = z.infer<typeof regraPublicaSchema>;
 export type MensagemHistorico = z.infer<typeof mensagemHistoricoSchema>;
 export type Caso = z.infer<typeof casoSchema>;
 export type Erro = z.infer<typeof erroSchema>;

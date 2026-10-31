@@ -74,6 +74,10 @@ Testado com o build de produção, um `.env` de verdade e `OpenRouterProvider` c
 
 **Não testado com o OpenRouter real**, porque não havia chave disponível. Não se sabe com que frequência um modelo real passa pelo verificador, que é rígido: se reprovar sempre, a aplicação continua correta, só que sempre por template. `npm run llm:ping` confirma a conexão, mas não essa taxa.
 
+## Desvio conhecido
+
+A tela não mostra as fontes, por decisão do grupo. A API continua devolvendo-as, e os testes conferem isso, mas o item 3 do `CASE.md`, FR-009 e SC-003 não são atendidos na tela.
+
 ## Publicação
 
 Não feita. Exige as contas do grupo.

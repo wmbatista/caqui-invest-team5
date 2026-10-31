@@ -2,7 +2,7 @@
 
 **URL pública:** ainda não publicada. **Spec:** [SPEC.md](SPEC.md). **Avaliação:** [docs/avaliacao.md](docs/avaliacao.md).
 
-Assistente para quem pergunta "meu dinheiro está lá?": mostra onde está o saldo e quando cada operação cai, com a conta e a fonte à mostra. Golpe, pressão de terceiro e confusão vão para uma pessoa, que já recebe protocolo e histórico. Portado do projeto Caqui Confere para TypeScript, sem banco de dados.
+Assistente para quem pergunta "meu dinheiro está lá?": mostra onde está o saldo e quando cada operação cai, com a explicação da data. Golpe, pressão de terceiro e confusão vão para uma pessoa, que já recebe protocolo e histórico. Portado do projeto Caqui Confere para TypeScript, sem banco de dados.
 
 ## Rodar
 
@@ -36,6 +36,7 @@ mensagem ──► triagem (golpe · recomendação · injeção · vulnerável)
 - **`apps/backend`:** Fastify. Lê `dados/` na subida; sessões, conversas e fila ficam em memória e somem ao reiniciar.
 - **`apps/web`:** React com Vite. Telas do cliente e do atendente.
 - **`packages/contracts`:** schemas Zod da API, compartilhados. Referência: [OpenAPI](specs/001-onde-esta-meu-dinheiro/contracts/openapi.yaml).
+- **Fontes:** a API devolve de onde veio cada informação, mas a tela não mostra. É uma decisão do grupo que não cumpre o item 3 de "O que vale para qualquer caminho" ([SPEC.md](SPEC.md)).
 - **LLM (opcional):** só reescreve um texto já correto de status ou posição. Se inventar um fato, falhar ou não houver chave, vale o template.
 
 Limite da demo: com o login simulado, qualquer visitante da URL pública pode entrar como atendente e ler o que outros digitaram. O CPF é mascarado, o resto do texto não.

@@ -8,19 +8,26 @@ import { apiCliente, dinheiro, euMarta, resposta, simularApi } from './apoio';
 afterEach(() => vi.unstubAllGlobals());
 
 describe('Meu dinheiro', () => {
-  it('shows total, account balance, positions with ids and the gross warning', () => {
+  it('shows total, account balance, positions and the gross warning', () => {
     render(<MeuDinheiroPainel dados={dinheiro} />);
     expect(screen.getByText('R$ 62.271,15')).toBeVisible();
     expect(screen.getByText('R$ 1.250,00')).toBeVisible();
-    expect(screen.getByText(/P-0001/)).toBeVisible();
+    expect(screen.getByText('CDB 110')).toBeVisible();
+    expect(screen.getByText('R$ 40.791,24')).toBeVisible();
+    expect(screen.getByText(/vence em 05\/09\/2028/)).toBeVisible();
     expect(screen.getByText(/brutos, antes do imposto/)).toBeVisible();
   });
 
   it('shows ongoing movements with the date and hides settled ones', () => {
     render(<MeuDinheiroPainel dados={dinheiro} />);
     expect(screen.getByText('18/11/2026', { exact: false, selector: 'b' })).toBeVisible();
-    expect(screen.getByText(/OP-10005/)).toBeVisible();
-    expect(screen.queryByText(/OP-10006/)).toBeNull();
+    expect(screen.getByText(/Resgate · CDB 110/)).toBeVisible();
+    expect(screen.queryByText(/Aplicação · LCI/)).toBeNull();
+  });
+
+  it('shows no code at all', () => {
+    const { container } = render(<MeuDinheiroPainel dados={dinheiro} />);
+    expect(container.textContent).not.toMatch(/\b(?:OP|P|KB|C)-\d/);
   });
 
   it('marks a late movement and explains a refused one', () => {

@@ -41,8 +41,8 @@ São **de 27 a 35 atendentes a menos**, dos 210 que faltam (310 − 100). É uma
 
 ## 4. Como a confiança aparece?
 
-- **Prova, não promessa.** A resposta traz a data, o porquê ("depois do corte das 16h, então conta a partir de 18/11") e a fonte: o artigo (KB-006) e o dado da conta (OP-10005).
-- **Saída sempre visível.** Falar com uma pessoa, reclamar, encerrar e segurança ficam fixos no topo. Das 8h às 20h, mostra a espera; fora disso, protocolo e retorno a partir das 8h.
+- **Prova, não promessa.** A resposta traz a data e o porquê ("depois do corte das 16h, então conta a partir de 18/11").
+- **Saída sempre visível.** Falar com uma pessoa, reclamar e encerrar ficam fixos como opções do chat, fora da área que rola. Das 8h às 20h, mostra a espera; fora disso, protocolo e retorno a partir das 8h.
 - **Ela não repete.** Quem atende vê protocolo, resumo e o histórico inteiro.
 - **Golpe para tudo.** A orientação vem na hora, o acesso é bloqueado (simulado) e a segurança é acionada a qualquer hora.
 - **Diz quando não sabe.** Data fora do calendário vira "não vou arriscar um prazo", e assunto fora do escopo é dito como tal.
@@ -80,7 +80,7 @@ São **de 27 a 35 atendentes a menos**, dos 210 que faltam (310 − 100). É uma
 | 11 | Instrução escondida na conversa | Sim | PT-34 a PT-36 | |
 | 12 | Horário | Sim | PT-37 e PT-38 | |
 
-Os seis itens de "O que vale para qualquer caminho" se aplicam, porque a solução conversa com o cliente. O item 2 fala em explicar conceitos: aqui o assistente não os explica e encaminha, o que é mais restrito e não viola a regra.
+Os seis itens de "O que vale para qualquer caminho" se aplicam, porque a solução conversa com o cliente. **O item 3 (mostrar de onde veio) não é cumprido na tela:** ver "Decisões". O item 2 fala em explicar conceitos: aqui o assistente não os explica e encaminha, o que é mais restrito e não viola a regra.
 
 Resultado medido: [docs/avaliacao.md](docs/avaliacao.md).
 
@@ -96,4 +96,8 @@ Resultado medido: [docs/avaliacao.md](docs/avaliacao.md).
 | 31/10 | Resgate total declarado encaminha em qualquer idade; pergunta hipotética não | Texto de FR-015; "quanto recebo se resgatar tudo?" não é pedido |
 | 31/10 | Remover `POST /perguntar` e o contrato antigo de `/api/v1/chat` | Recebiam o cliente no corpo ou mandavam a pergunta ao LLM sem fatos, sem triagem |
 | 31/10 | Protocolo por conversa, e não por passagem a humano | KB-026: "todo atendimento gera um protocolo" |
+| 31/10 | As regras não aparecem na tela nem na API, para cliente ou atendente | Pedido do grupo: o cliente não precisa saber das regras. Ele continua vendo a fonte (artigo ou dado da conta), que é exigência do case |
+| 31/10 | Nenhum código na tela (KB, OP, P, C, CQ). Só o protocolo continua visível | Pedido do grupo: códigos não ajudam quem usa a tela |
+| 31/10 | As fontes não aparecem na tela; os ids seguem na API (`fontes`), para rastreio | **Decisão do grupo, ciente de que descumpre o item 3 de "O que vale para qualquer caminho" do `CASE.md`**, além de FR-009, SC-003 e o princípio III. Desvio justificado em `plan.md` |
+| 31/10 | Falar com uma pessoa, Reclamar e Encerrar conta viraram opções do chat; o botão Segurança saiu | Pedido do grupo. Golpe continua sendo detectado pelo texto da mensagem e vai para a segurança a qualquer hora, mas o cliente não tem mais um atalho para isso |
 | 31/10 | "Me mandaram um link pra confirmar meus dados" segue sem ser detectado | Padrão de texto não pega sem gerar falso alarme. **Em aberto para o grupo**; registrado como `it.todo` |

@@ -21,7 +21,8 @@ export function rotasChat(app: FastifyInstance, assistente: Assistente, sessoes:
     try {
       const resposta = await assistente.responder({ clienteId, conversaId, mensagem, agora: sessao.agora });
       if (resposta.sessaoBloqueada) sessoes.encerrarDoCliente(clienteId);
-      return resposta;
+      const { regras: _regrasInternas, ...publica } = resposta;
+      return publica;
     } catch (erro) {
       if (erro instanceof ConversaNaoEncontrada) throw new ErroHttp(404, 'CONVERSA_NAO_ENCONTRADA', 'Conversa não encontrada.');
       throw erro;

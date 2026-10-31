@@ -27,6 +27,11 @@ describe('textoAprovado', () => {
     expect(textoAprovado(bom, template)).toBe(true);
   });
 
+  it('does not take a protocol for a rule code', () => {
+    const comProtocolo = `${template} Protocolo CQ-20261118-0001.`;
+    expect(textoAprovado(comProtocolo, comProtocolo)).toBe(true);
+  });
+
   it.each([
     ['wrong date', bom.replace('18/11/2026', '19/11/2026')],
     ['date in words', `${bom} Cai dia 19 de novembro.`],
@@ -44,6 +49,10 @@ describe('textoAprovado', () => {
     ['alarm word sumiu', `${bom} Não sumiu.`],
     ['alarm word perdido', `${bom} Nada está perdido.`],
     ['full CPF', `${bom} Seu CPF é ${cpf}.`],
+    ['rule code', `${bom} Conforme a CQ-01.`],
+    ['constitution rule code', `${bom} Veja CQ-C4.`],
+    ['mention of a rule', `${bom} Essa é a regra do atendimento.`],
+    ['mention of the norms', `${bom} As normas vigentes dizem isso.`],
     ['empty', '   '],
   ])('rejects %s', (_nome, texto) => {
     expect(textoAprovado(texto, template)).toBe(false);

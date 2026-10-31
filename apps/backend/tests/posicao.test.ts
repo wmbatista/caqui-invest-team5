@@ -37,6 +37,8 @@ describe('calcularMeuDinheiro', () => {
   it('shows the LCI grace period', () => {
     const { posicoes } = calcularMeuDinheiro(repo, repo.getCliente('C-0001'), AGORA_PADRAO);
     expect(posicoes[1].texto).toContain('Em carência até 03/01/2027');
+    expect(posicoes[1].observacao).toContain('Em carência até 03/01/2027');
+    expect(posicoes[0].observacao).toBeNull();
   });
 
   it('marks shares and Multimercado as oscillating, with no projection', () => {

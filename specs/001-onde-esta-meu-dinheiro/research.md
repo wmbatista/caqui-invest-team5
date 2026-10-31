@@ -51,7 +51,8 @@ Não restou nenhum NEEDS CLARIFICATION. O que foi medido nesta pesquisa está em
 - **Decision**: `src/regras/regras-caqui.ts`, um módulo tipado com código, título, camada
   (Constituição, Lei, Decreto), texto, instrução ao LLM e parâmetros. São 17 regras: as 19 do caqui
   menos CQ-02 e CQ-03. Referências a Eugênio, IRP, clone e André saem do texto.
-- **Rationale**: preserva a boa ideia do caqui, em que código, modelo e tela leem a mesma regra. Por
+- **Rationale**: código e modelo leem a mesma regra. **As regras são internas**: diferente do caqui,
+  nem o cliente nem o atendente as veem na tela ou na API. Por
   ser módulo, entra no build sem caminho de arquivo em `dist` e `tsc` valida os parâmetros.
 - **Herdado, a confirmar pelo grupo**: resgate atípico = 50% ou mais do investido, ou R$ 20.000 ou
   mais (CQ-D1). O número foi decisão de outro grupo e **não vem do CASE**. Vai para "Decisões" do

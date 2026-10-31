@@ -6,7 +6,7 @@ import { apiCliente, euMarta, resposta, simularApi } from './apoio';
 
 afterEach(() => vi.unstubAllGlobals());
 
-const BOTOES = ['Falar com uma pessoa', 'Reclamar', 'Encerrar conta', 'Segurança'];
+const BOTOES = ['Falar com uma pessoa', 'Reclamar', 'Encerrar conta'];
 
 function montar(eu = euMarta) {
   render(<Cliente euInicial={eu} aoSair={() => {}} aoBloquear={() => {}} />);
@@ -17,6 +17,16 @@ describe('saída para humano', () => {
     simularApi(apiCliente);
     montar();
     for (const nome of BOTOES) expect(await screen.findByRole('button', { name: nome })).toBeVisible();
+  });
+
+  it('shows the exits inside the chat, with no security button', async () => {
+    simularApi(apiCliente);
+    const { container } = render(<Cliente euInicial={euMarta} aoSair={() => {}} aoBloquear={() => {}} />);
+    const falar = await screen.findByRole('button', { name: 'Falar com uma pessoa' });
+    expect(falar.closest('.chat')).not.toBeNull();
+    expect(falar.closest('.msgs')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Segurança' })).toBeNull();
+    expect(container.querySelector('header')?.textContent).not.toContain('Falar com uma pessoa');
   });
 
   it('keeps every exit after a conversation turn', async () => {
@@ -60,6 +70,43 @@ describe('saída para humano', () => {
     const mensagem = await screen.findByText(/<img src=x/);
     expect(within(mensagem).queryByRole('img')).toBeNull();
     expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('never shows or asks for the rules', async () => {
+    const api = simularApi({ ...apiCliente, 'POST /chat': resposta({ resposta: 'Cai hoje.', fontes: [{ tipo: 'kb', id: 'KB-006', titulo: 'Prazos de resgate' }, { tipo: 'conta', id: 'OP-10005', titulo: 'Resgate de R$ 40.000,00' }] }) });
+    const { container } = render(<Cliente euInicial={euMarta} aoSair={() => {}} aoBloquear={() => {}} />);
+    const usuario = userEvent.setup();
+    await usuario.type(await screen.findByPlaceholderText('Escreva sua pergunta'), 'Quando cai?');
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await screen.findByText('Cai hoje.');
+    expect(screen.queryByText('Prazos de resgate')).toBeNull();
+    expect(screen.queryByText('Resgate de R$ 40.000,00')).toBeNull();
+    expect(container.textContent).not.toContain('De onde veio');
+    expect(container.textContent).not.toMatch(/\bRegra\b|KB-\d|OP-\d|P-\d{4}|C-\d{4}/);
+    expect(container.textContent).not.toContain('***');
+    expect(api.mock.calls.some(([url]) => String(url).endsWith('/regras'))).toBe(false);
+  });
+
+  it('shows the chosen option by name, while the API receives the id', async () => {
+    const api = simularApi({ ...apiCliente, 'POST /chat': resposta({ resposta: 'Qual delas?', opcoes: [{ id: 'OP-10007', descricao: 'Resgate de R$ 3.000,00 (Multimercado)' }] }) });
+    const { container } = render(<Cliente euInicial={euMarta} aoSair={() => {}} aoBloquear={() => {}} />);
+    const usuario = userEvent.setup();
+    await usuario.type(await screen.findByPlaceholderText('Escreva sua pergunta'), 'Quando cai?');
+    await usuario.click(screen.getByRole('button', { name: 'Enviar' }));
+    await usuario.click(await screen.findByRole('button', { name: 'Resgate de R$ 3.000,00 (Multimercado)' }));
+    await vi.waitFor(() => expect(container.querySelectorAll('.msg.cliente')).toHaveLength(2));
+    await vi.waitFor(() => expect(api.mock.calls.filter(([url]) => String(url).endsWith('/chat'))).toHaveLength(2));
+    const ultima = api.mock.calls.filter(([url]) => String(url).endsWith('/chat')).at(-1);
+    expect(JSON.parse(String(ultima?.[1]?.body)).mensagem).toBe('OP-10007');
+    expect(screen.queryByText('OP-10007')).toBeNull();
+    expect(container.querySelectorAll('.msg.cliente')[1].textContent).toBe('Resgate de R$ 3.000,00 (Multimercado)');
+  });
+
+  it('keeps the protocol visible when the case is handed over', async () => {
+    simularApi({ ...apiCliente, 'POST /chat': resposta({ resposta: 'Um atendente vai falar com você.', acao: 'encaminhar_humano' }) });
+    render(<Cliente euInicial={euMarta} aoSair={() => {}} aoBloquear={() => {}} />);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Falar com uma pessoa' }));
+    expect(await screen.findByText('Protocolo CQ-20261118-0001')).toBeVisible();
   });
 
   it('warns that the clock is simulated', async () => {

@@ -12,7 +12,7 @@ export interface Redacao {
 function sistema(): string {
   return 'Você é o atendimento automático da Caqui Invest, corretora digital fictícia. Reescreva o TEXTO CORRETO em português '
     + 'simples, para quem investe pela primeira vez: frases curtas, sem markdown e sem alarme. '
-    + 'Mantenha exatamente todas as datas, valores em R$, horas e ids. Não calcule, não acrescente fato nenhum e não recomende.\n\n'
+    + 'Mantenha exatamente todas as datas, valores em R$, horas e ids. Não calcule, não acrescente fato nenhum, não recomende e nunca cite as normas nem seus códigos.\n\n'
     + `NORMAS VIGENTES (a superior prevalece):\n${promptDeRegras()}`;
 }
 

@@ -37,6 +37,6 @@ export function fonteKb(ctx: Pick<Dependencias, 'repo'>, ...ids: string[]): Font
   return [...new Set(ids)].map((id) => ({ tipo: 'kb' as const, id, titulo: ctx.repo.getArtigo(id).titulo }));
 }
 
-export function fonteConta(...ids: string[]): Fonte[] {
-  return [...new Set(ids)].map((id) => ({ tipo: 'conta' as const, id }));
+export function fonteConta(...itens: { id: string; titulo: string }[]): Fonte[] {
+  return itens.map(({ id, titulo }) => ({ tipo: 'conta' as const, id, titulo }));
 }

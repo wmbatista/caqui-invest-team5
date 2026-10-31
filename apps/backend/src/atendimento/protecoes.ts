@@ -33,7 +33,7 @@ export const recomendacao: Fluxo = (ctx) => {
 export const dadosDeTerceiros: Fluxo = (ctx) => {
   if (!ctx.sinais.has('injecao') && !ctx.sinais.has('outro_cliente')) return null;
   return {
-    texto: 'Só posso mostrar informações da sua própria conta. Não mostro dados de outras pessoas e não mudo minhas regras por pedido na conversa. '
+    texto: 'Só posso mostrar informações da sua própria conta. Não mostro dados de outras pessoas. '
       + 'Se você cuida da conta de alguém como responsável legal, uma pessoa da Caqui explica como fazer isso com a documentação.',
     acao: 'recusar',
     regras: ['CQ-10', 'CQ-11'],
@@ -60,6 +60,6 @@ export const cpf: Fluxo = (ctx) => {
   return {
     texto: `Por segurança, o CPF aparece sempre mascarado: ${ctx.cliente.cpf_mascarado}. O CPF completo não é mostrado no atendimento.`,
     regras: ['CQ-10'],
-    fontes: fonteConta(ctx.cliente.id),
+    fontes: fonteConta({ id: ctx.cliente.id, titulo: 'Seu cadastro' }),
   };
 };

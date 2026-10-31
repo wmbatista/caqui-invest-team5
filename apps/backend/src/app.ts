@@ -11,7 +11,6 @@ import { ErroHttp } from './routes/comum.js';
 import { rotasAtendente } from './routes/atendente.js';
 import { rotasChat } from './routes/chat.js';
 import { rotasConta } from './routes/conta.js';
-import { rotasRegras } from './routes/regras.js';
 import { rotasSessao } from './routes/sessao.js';
 import { Sessoes } from './sessao/sessoes.js';
 
@@ -53,7 +52,6 @@ export async function buildApp(config: Config, provider: LlmProvider, opcoes: Op
   rotasSessao(app, repo, sessoes);
   rotasChat(app, assistente, sessoes, config.chatLimitePorMinuto);
   rotasConta(app, repo, sessoes);
-  rotasRegras(app, sessoes);
   rotasAtendente(app, repo, estado, sessoes);
 
   return app;

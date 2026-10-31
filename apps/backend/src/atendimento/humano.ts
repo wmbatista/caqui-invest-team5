@@ -19,6 +19,21 @@ export function temSinalVulneravel(sinais: Iterable<string>): boolean {
   return [...sinais].some((sinal) => SINAIS_VULNERAVEIS.has(sinal));
 }
 
+const ROTULO_DO_SINAL: Record<string, string> = {
+  golpe: 'suspeita de golpe',
+  recomendacao: 'pedido de recomendação',
+  injecao: 'instrução escondida na mensagem',
+  outro_cliente: 'pedido de dado de outra pessoa',
+  terceiro: 'pressão de terceiro',
+  transfere_terceiro: 'transferência para terceiro',
+  confusao: 'confusão',
+  resgate_total: 'pedido de resgate total',
+  humano: 'pediu uma pessoa',
+  reclamacao: 'reclamação',
+  encerramento: 'encerramento de conta',
+  nao_entendeu: 'não entendido',
+};
+
 function minutos(hhmm: string): number {
   const [hora, minuto] = hhmm.split(':').map(Number);
   return hora * 60 + minuto;
@@ -50,11 +65,12 @@ export function saidaHumano(cliente: Pick<ClienteResumo, 'idade'>, agora: number
 export function encaminhar(ctx: ContextoHumano, destino: Destino, motivo: string, sinais: Iterable<string> = []): void {
   const lista = [...sinais].sort();
   const vulneravel = temSinalVulneravel(lista);
+  const rotulos = lista.map((sinal) => ROTULO_DO_SINAL[sinal] ?? sinal).filter((rotulo) => rotulo !== motivo);
   const ultima = ctx.estado.historico(ctx.conversa.id).filter(({ autor }) => autor === 'cliente').at(-1);
   const idade = temPrioridadePorIdade(ctx.cliente) ? `${ctx.cliente.idade} anos, prioridade 60+` : `${ctx.cliente.idade} anos`;
   const resumo = [
     `${ctx.cliente.nome} (${idade}, ${ctx.cliente.origem.replaceAll('_', ' ')}). Motivo: ${motivo}.`,
-    ...(lista.length ? [`Sinais: ${lista.join(', ')}.`] : []),
+    ...(rotulos.length ? [`Sinais: ${rotulos.join(', ')}.`] : []),
     ...(ultima ? [`Última mensagem: "${ultima.texto}".`] : []),
   ].join(' ');
   ctx.estado.abrirEncaminhamento({

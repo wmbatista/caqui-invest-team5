@@ -204,4 +204,6 @@ antes do porte, descrito em [R17](research.md#r17-guardrails-medidos).
 
 ## Complexity Tracking
 
-Nenhuma violação.
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+| --- | --- | --- |
+| Princípio III, FR-009, SC-003 e o item 3 do `CASE.md` pedem mostrar a origem de toda informação factual; a tela não mostra fontes, e elas ficam em `fontes[].id` e `fontes[].titulo` na API | Decisão do grupo: tela mais limpa, com a explicação da data no próprio texto | Mostrar o id em letra pequena e mostrar só o nome da fonte foram propostos e recusados pelo grupo. A constituição e a spec seguem sem emenda: **a emenda fica a decidir pelo grupo**, e até lá a solução não atende a esse item do case |

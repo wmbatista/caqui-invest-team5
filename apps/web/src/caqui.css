@@ -12,12 +12,13 @@ input { font: inherit; padding: 10px 12px; border: 1px solid var(--borda); borde
 header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--cartao); border-bottom: 1px solid var(--borda); }
 .marca { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 22px; }
 .marca i { width: 28px; height: 28px; border-radius: 50%; background: var(--caqui); display: inline-block; box-shadow: inset -5px -5px 0 rgba(0,0,0,.12); }
-.saida { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 20px; background: #fff4ec; border-bottom: 2px solid var(--caqui); }
-.saida .status { flex: 1; min-width: 220px; color: var(--suave); font-size: 17px; }
+.saida { margin: 0 0 8px; }
+.saida .sugestoes { margin: 0 0 4px; }
+.saida .status { display: block; color: var(--suave); font-size: 14px; }
 .demo { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 6px 20px; font-size: 14px; color: var(--suave); background: #f1ece7; }
 .demo button { padding: 2px 10px; font-size: 14px; }
 main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 20px; padding: 20px; max-width: 1280px; margin: 0 auto; }
-@media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 12px; } }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 12px; } .chat { order: -1; position: static; height: calc(100vh - 150px); } }
 .cartao { background: var(--cartao); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; }
 h2 { margin: 0 0 6px; font-size: 22px; }
 .total { font-size: 30px; font-weight: 700; }
@@ -26,14 +27,16 @@ h2 { margin: 0 0 6px; font-size: 22px; }
 .pill.pendente { background: #fff3bf; color: #8a6d00; } .pill.em_processamento { background: #d3f9d8; color: var(--ok); }
 .pill.liquidada { background: #ebfbee; color: var(--ok); } .pill.recusada { background: #ffe3e3; color: var(--alerta); }
 .fonte { font-size: 14px; color: var(--suave); }
-.chat { display: flex; flex-direction: column; height: calc(100vh - 210px); min-height: 480px; }
+.chat { display: flex; flex-direction: column; position: sticky; top: 12px; height: calc(100vh - 150px); min-height: 480px; }
 .msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 12px; }
 .msg { max-width: 92%; padding: 12px 14px; border-radius: var(--raio); white-space: pre-line; }
 .msg.cliente { align-self: flex-end; background: #ffe8d9; }
 .msg.caqui { align-self: flex-start; background: #f6f3f0; border: 1px solid var(--borda); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; white-space: normal; }
 .chip { font-size: 13px; padding: 2px 8px; border-radius: 6px; background: #fff; border: 1px solid var(--borda); color: var(--suave); }
-.chip.regra { border-color: #c5d5ea; color: var(--info); }
+.item { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+.item b { white-space: nowrap; }
+.observacao { font-size: 16px; color: var(--caqui-escuro); margin-top: 2px; }
 .chip.protocolo { border-color: var(--caqui); color: var(--caqui-escuro); font-weight: 600; }
 .sugestoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .sugestoes button { font-size: 16px; padding: 6px 12px; }

@@ -11,6 +11,8 @@ type Resposta = Awaited<ReturnType<typeof responderPt>>['ultima'];
 
 function conferir(resposta: Resposta, clienteId: string, contexto: string) {
   expect(resposta.resposta, contexto).not.toMatch(CPF_COMPLETO);
+  expect(resposta.resposta, contexto).not.toMatch(/\b(?:KB|OP|P)-\d+\b|\bC-\d{4}\b|\bCQ-(?:C|D)?\d{1,2}\b/);
+  for (const fonte of resposta.fontes) expect(fonte.titulo, `${contexto}: ${fonte.id}`).toBeTruthy();
   expect(resposta.resposta, contexto).not.toContain('KB-007');
   expect(resposta.fontes.map(({ id }) => id), contexto).not.toContain('KB-007');
   const texto = normalizar(resposta.resposta);

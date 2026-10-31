@@ -27,10 +27,23 @@ function nomeProduto(ctx: Contexto, codigo: string | null): string {
   return codigo ? ctx.repo.getProduto(codigo).nome : 'Pix';
 }
 
-function nomeTipo(tipo: OperacaoRecord['tipo']): string {
+export function nomeTipo(tipo: OperacaoRecord['tipo']): string {
   if (tipo === 'resgate') return 'resgate';
   if (tipo === 'aplicacao') return 'aplicação';
   return tipo === 'transferencia_entrada' ? 'transferência recebida' : 'transferência';
+}
+
+function capitalizar(texto: string): string {
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+/** "Resgate de R$ 40.000,00 (CDB...)": como a operação aparece para o cliente, sem código. */
+export function rotuloOperacao(tipo: OperacaoRecord['tipo'], valor: string, produto: string): string {
+  return `${capitalizar(nomeTipo(tipo))} de ${valor} (${produto})`;
+}
+
+function fonteOperacao(ctx: Contexto, op: OperacaoRecord) {
+  return { id: op.id_operacao, titulo: rotuloOperacao(op.tipo, brl(op.valor_brl), nomeProduto(ctx, op.produto)) };
 }
 
 function destinoDe(tipo: OperacaoRecord['tipo']): string {
@@ -52,7 +65,7 @@ async function explicar(ctx: Contexto, op: OperacaoRecord): Promise<RespostaFlux
     return {
       texto: `Seu pedido de ${tipo} de ${brl(op.valor_brl)} no ${nome} foi recusado: ${op.observacao}. O dinheiro continua aplicado, rendendo normalmente.`,
       regras,
-      fontes: [...fonteConta(op.id_operacao), ...fonteKb(ctx, 'KB-005', 'KB-011', 'KB-008')],
+      fontes: [...fonteConta(fonteOperacao(ctx, op)), ...fonteKb(ctx, 'KB-005', 'KB-011', 'KB-008')],
     };
   }
 
@@ -62,14 +75,14 @@ async function explicar(ctx: Contexto, op: OperacaoRecord): Promise<RespostaFlux
   const hoje = paraBrt(ctx.agora).data;
   const inicio = `Seu ${tipo} de ${brl(op.valor_brl)} do ${nome}`;
   const conta = `Como chegamos a essa data: ${prazo.passos.join(' ')}`;
-  const fontes = [...fonteConta(op.id_operacao), ...fonteKb(ctx, ...prazo.fontes, 'KB-008')];
+  const fontes = [...fonteConta(fonteOperacao(ctx, op)), ...fonteKb(ctx, ...prazo.fontes, 'KB-008')];
   const destino = destinoDe(op.tipo);
 
   if (op.status === 'liquidada') {
     return comRedacao(ctx, `${inicio} já foi concluído em ${dataBr(caiEm)}: o dinheiro está ${destino}.\n${conta}`, regras, fontes);
   }
   if (caiEm < hoje) {
-    const { texto, acao } = paraHumano(ctx, `liquidação atrasada da ${op.id_operacao}`);
+    const { texto, acao } = paraHumano(ctx, `liquidação atrasada: ${rotuloOperacao(op.tipo, brl(op.valor_brl), nome)}`);
     return {
       texto: `${inicio} deveria ter sido concluído em ${dataBr(caiEm)} e ainda está ${op.status.replace('_', ' ')}. Houve um atraso na liquidação. O pedido continua registrado.\n${conta}\n${texto}`,
       acao,
@@ -96,7 +109,7 @@ async function comRedacao(ctx: Contexto, template: string, regras: string[], fon
 
 function descrever(ctx: Contexto, op: OperacaoRecord): string {
   const { data } = paraBrt(op.pedido_instante);
-  return `${op.id_operacao}: ${nomeTipo(op.tipo)} de ${brl(op.valor_brl)} (${nomeProduto(ctx, op.produto)}), pedido em ${dataBr(data)}`;
+  return `${rotuloOperacao(op.tipo, brl(op.valor_brl), nomeProduto(ctx, op.produto))}, pedido em ${dataBr(data)}`;
 }
 
 function naoEncontrada(ctx: Contexto, recentes: OperacaoRecord[]): RespostaFluxo {
@@ -107,7 +120,7 @@ function naoEncontrada(ctx: Contexto, recentes: OperacaoRecord[]): RespostaFluxo
   return {
     texto: `Não encontrei essa operação na sua conta, e não vou supor. Suas operações mais recentes são:\n${lista.map((op) => `• ${descrever(ctx, op)}.`).join('\n')}\nSe a sua não está aqui, uma pessoa verifica: toque em Falar com uma pessoa.`,
     regras: ['CQ-09', 'CQ-C3'],
-    fontes: fonteConta(...lista.map(({ id_operacao: id }) => id)),
+    fontes: fonteConta(...lista.map((op) => fonteOperacao(ctx, op))),
   };
 }
 
@@ -144,9 +157,19 @@ function escolher(ctx: Contexto, candidatas: OperacaoRecord[]): RespostaFluxo {
   return {
     texto: 'Encontrei mais de uma operação que combina com o que você disse. Qual delas você quer ver?',
     regras: ['CQ-C3'],
-    fontes: fonteConta(...candidatas.map(({ id_operacao: id }) => id)),
+    fontes: fonteConta(...candidatas.map((op) => fonteOperacao(ctx, op))),
     opcoes: candidatas.map((op) => ({ id: op.id_operacao, descricao: descrever(ctx, op) })),
   };
+}
+
+/** A opção escolhida chega como id; no histórico que o atendente lê, ela aparece pelo nome. */
+export function trocarIdsPorNomes(texto: string, ctx: Pick<Contexto, 'repo' | 'cliente' | 'agora'>): string {
+  if (!/\bop-\d+\b/i.test(texto)) return texto;
+  const operacoesDoCliente = ctx.repo.getOperacoes(ctx.cliente.id, ctx.agora);
+  return texto.replace(/\bop-\d+\b/gi, (id) => {
+    const op = operacoesDoCliente.find(({ id_operacao: atual }) => atual === id.toUpperCase());
+    return op ? rotuloOperacao(op.tipo, brl(op.valor_brl), op.produto ? ctx.repo.getProduto(op.produto).nome : 'Pix') : id;
+  });
 }
 
 /** Fluxo de status e prazo. Devolve nulo quando a pergunta é sobre a posição e não há operação a explicar. */
