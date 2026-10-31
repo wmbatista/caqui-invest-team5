@@ -39,3 +39,4 @@
 - [x] T017 [US1] Implementar intenção restrita e `POST /perguntar`
 - [x] T018 [US1] Validar valores da LLM e usar template em falha ou divergência
 - [x] T019 [US1] Testar C-0001, isolamento, fora de escopo, erros e fontes
+- [x] T020 [US1] Criar frontend minimalista responsivo em `apps/frontend`

@@ -173,7 +173,7 @@ M02 e a cadeia M03 a M07 são independentes e podem ser feitas em qualquer ordem
 - **Pronto quando:** o relatório está commitado e cada falha virou uma tarefa nova aqui (M11a,
   M11b...).
 
-### [ ] M12: Forma de conversar com o agente · P · *opcional*
+### [x] M12: Forma de conversar com o agente · P · *opcional*
 - **Entregas:** um CLI (`npm run perguntar -- C-0001 "cadê meu resgate?"`) **ou** uma página HTML
   estática servida pelo backend, com seletor de cliente, campo de pergunta e fontes clicáveis.
 - **Pronto quando:** dá para demonstrar US1 e US2 sem usar o `curl`.
@@ -192,3 +192,4 @@ horário e protocolo (T15), front (T17 a T20), custo e abuso (T23) e deploy (T24
 | 2026-10-31 | Planejamento | Roadmap MVP criado a partir do ROADMAP.md: só "onde está meu dinheiro", sem histórico nem sessão. |
 | 2026-10-31 | M01 | Workspace `apps/backend`, config tipada, `/health`, scripts e testes concluídos. E02 atualizado para OpenRouter via `fetch`. |
 | 2026-10-31 | M02 | Provider OpenRouter via `fetch`, `NullProvider`, timeout, validação, teste simulado e `llm:ping` concluídos. |
+| 2026-10-31 | M12 | Frontend minimalista em `apps/frontend`, com cliente, pergunta, resposta e fontes. |

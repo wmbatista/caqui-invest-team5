@@ -104,6 +104,8 @@ Como cliente, recebo orientação segura e humano quando relato golpe ou peço r
 - **FR-016**: MUST rejeitar texto gerado que contenha valor monetário ausente dos fatos.
 - **FR-017**: MUST montar fontes em código com ids das posições e do cliente.
 - **FR-018**: MUST responder de forma fixa a perguntas fora da intenção de posição.
+- **FR-019**: MUST oferecer interface responsiva com seleção de cliente sintético, pergunta,
+  estados de carregamento/erro, resposta e fontes.
 
 ### Key Entities
 
@@ -128,5 +130,6 @@ Como cliente, recebo orientação segura e humano quando relato golpe ou peço r
 
 - O frontend reenvia o histórico; persistência e autenticação ficam fora do MVP.
 - O acesso aos modelos ocorre por uma credencial de API do OpenRouter.
-- Streaming, tools, RAG e handoff real ficam para incrementos posteriores.
+- Streaming, tools, RAG e handoff real ficam para incrementos posteriores; o MVP inclui apenas
+  uma interface web minimalista para demonstrar `/perguntar`.
 - Demo pública receberá autenticação e rate limit antes do deploy.

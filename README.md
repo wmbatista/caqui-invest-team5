@@ -11,6 +11,15 @@ npm install
 npm run dev
 ```
 
+Em outro terminal, inicie o frontend:
+
+```bash
+npm run dev:frontend
+```
+
+Abra `http://localhost:5173`. Para apontar a interface para outro backend, copie
+`apps/frontend/.env.example` para `apps/frontend/.env` e ajuste `VITE_API_URL`.
+
 O endpoint do MVP0 é `POST /perguntar`; veja a [especificação](specs/001-chat-api-backend/spec.md),
 o [OpenAPI](specs/001-chat-api-backend/contracts/openapi.yaml) e o [quickstart](specs/001-chat-api-backend/quickstart.md).
 Este MVP não persiste conversas: o frontend reenvia o histórico em cada chamada.
